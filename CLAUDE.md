@@ -9,7 +9,9 @@ feature contributing `flake.modules.nixos.<name>` and/or
 ## Keep the docs in sync (hard rule)
 
 Any commit that adds/removes/renames a module or meaningfully changes what a
-module does MUST update `docs/modules.md` in the same commit. New workflows,
+module does MUST, in the same commit: update `docs/modules.md`, keep the
+module's header comment accurate (it is the docstring), and regenerate
+`docs/reference.md` via `nix run .#docs > docs/reference.md`. New workflows,
 gotchas or recovery procedures go to `docs/operations.md`. `README.md` stays
 a short overview — update its module tree only when files are added/removed.
 

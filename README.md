@@ -50,10 +50,12 @@ modules/                     # one feature per file — auto-imported
   firefox.nix  vscode.nix  zed.nix  noctalia.nix
 ```
 
-**📚 Full documentation:** [docs/modules.md](docs/modules.md) — what every
-module does · [docs/operations.md](docs/operations.md) — rebuild/update
-recipes, secrets, persistence, disaster recovery. Both are updated in the
-same commit as any module change (enforced by `CLAUDE.md`).
+**📚 Full documentation:** [docs/modules.md](docs/modules.md) — curated
+per-module reference · [docs/operations.md](docs/operations.md) —
+rebuild/update recipes, secrets, persistence, disaster recovery ·
+[docs/reference.md](docs/reference.md) — **generated** from module header
+comments (`nix run .#docs > docs/reference.md`). Kept in sync with any
+module change (enforced by `CLAUDE.md`).
 
 ## 🔗 Hybrid configs (editable *and* tracked)
 
