@@ -1,0 +1,13 @@
+id           = "domdegi/battery-conserve"
+name         = "Battery Conservation"
+version      = "1.0.0"
+min_noctalia = "5.0.0"
+author       = "domdegi"
+license      = "MIT"
+icon         = "battery-vertical-eco"
+description  = "Show and toggle Lenovo IdeaPad battery conservation mode (charge cap at ~60%)."
+tags         = ["Bar"]
+
+[[widget]]
+id    = "widget"
+entry = "widget.luau"

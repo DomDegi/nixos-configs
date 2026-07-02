@@ -1,0 +1,13 @@
+id           = "domdegi/display-mode"
+name         = "Display Mode"
+version      = "1.0.0"
+min_noctalia = "5.0.0"
+author       = "domdegi"
+license      = "MIT"
+icon         = "screen-share"
+description  = "Toggle the external monitor between extend and mirror (presentation) mode."
+tags         = ["Bar"]
+
+[[widget]]
+id    = "widget"
+entry = "widget.luau"

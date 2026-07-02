@@ -1,0 +1,13 @@
+id           = "domdegi/airpods-audio"
+name         = "AirPods Audio"
+version      = "1.0.0"
+min_noctalia = "5.0.0"
+author       = "domdegi"
+license      = "MIT"
+icon         = "device-airpods"
+description  = "Switch AirPods between Music (A2DP, best quality) and Call (HFP, mic works) profiles."
+tags         = ["Bar"]
+
+[[widget]]
+id    = "widget"
+entry = "widget.luau"

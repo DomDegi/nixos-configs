@@ -1,0 +1,27 @@
+# Nix daemon settings, garbage collection, and nixpkgs policy.
+{
+  flake.modules.nixos.nix = {
+    # Allow proprietary software (Nvidia drivers, Spotify, VSCode)
+    nixpkgs.config.allowUnfree = true;
+
+    nix.gc = {
+      automatic = true;
+      dates = "weekly";
+      options = "--delete-older-than 7d";
+    };
+
+    nix.settings.auto-optimise-store = true;
+    nix.settings.experimental-features = [
+      "nix-command"
+      "flakes"
+    ];
+
+    system.autoUpgrade = {
+      enable = false;
+      dates = "02:00";
+      randomizedDelaySec = "45min";
+      operation = "boot";
+      channel = "https://nixos.org/channels/nixos-unstable";
+    };
+  };
+}

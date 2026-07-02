@@ -1,0 +1,9 @@
+keys:
+  # Host age key; private half lives at /persist/var/lib/sops-nix/key.txt
+  # (outside the repo, backed up in the password manager).
+  - &host age1p4cdwg2z29rgga5e25q9a7cv283lmtwgqjwdt3j3mrrzj7wuwv0smceues
+creation_rules:
+  - path_regex: secrets/.*\.ya?ml$
+    key_groups:
+      - age:
+          - *host

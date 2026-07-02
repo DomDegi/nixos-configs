@@ -1,0 +1,21 @@
+{
+    "security.workspace.trust.enabled": false,
+    "security.workspace.trust.untrustedFiles": "open",
+    "workbench.colorTheme": "Catppuccin Mocha",
+    "catppuccin.accentColor": "lavender",
+    "editor.inlineSuggest.edits.showCollapsed": true,
+    "git.confirmSync": false,
+    "notebook.lineNumbers": "on",
+    "git.autofetch": true,
+    "roo-cline.apiProvider": "ollama",
+    "roo-cline.ollamaModelId": "qwen2.5-coder:7b",
+    "roo-cline.ollamaBaseUrl": "http://127.0.0.1:11434",
+    "roo-cline.vsCodeLmModelSelector": {},
+    "roo-cline.debug": false,
+    "roo-cline.allowedCommands": [
+        "git log",
+        "git diff",
+        "git show"
+    ],
+    "roo-cline.deniedCommands": []
+}
