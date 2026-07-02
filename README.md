@@ -46,9 +46,14 @@ modules/                     # one feature per file — auto-imported
   secrets.nix  users.nix  boot.nix  nix.nix  locale.nix  network.nix
   nvidia.nix  audio.nix  bluetooth-airpods.nix  battery-conserve.nix
   display-mode.nix  niri.nix  greeter.nix  theming.nix  terminal.nix
-  dev.nix  nvim.nix  desktop-apps.nix  thunar.nix  firefox.nix
-  vscode.nix  zed.nix  noctalia.nix
+  dev.nix  nvim.nix  documents.nix  desktop-apps.nix  thunar.nix
+  firefox.nix  vscode.nix  zed.nix  noctalia.nix
 ```
+
+**📚 Full documentation:** [docs/modules.md](docs/modules.md) — what every
+module does · [docs/operations.md](docs/operations.md) — rebuild/update
+recipes, secrets, persistence, disaster recovery. Both are updated in the
+same commit as any module change (enforced by `CLAUDE.md`).
 
 ## 🔗 Hybrid configs (editable *and* tracked)
 
@@ -92,11 +97,13 @@ sudo install -D -m 600 <backup-of-key.txt> /persist/var/lib/sops-nix/key.txt
 ## 🛠️ Cheatsheet
 
 ```bash
-sudo nixos-rebuild switch --flake /persist/nixos-configs#nixos   # apply
-nix flake check                                                  # eval sanity
-nix store diff-closures /run/current-system ./result             # what changed?
-nix flake update && sudo nixos-rebuild switch --flake .#nixos    # upgrade
+nh os switch                                          # apply (shows package diff)
+nix flake check                                       # eval sanity
+nix flake update && nh os switch                      # upgrade everything
+sudo nixos-rebuild switch --flake .#nixos             # plain fallback
 ```
+
+More recipes in [docs/operations.md](docs/operations.md).
 
 Custom scripts wired to Noctalia bar widgets: `battery-conserve` (Lenovo 60%
 charge cap), `display-mode` (extend ↔ mirror via wl-mirror, also on Mod+P),
