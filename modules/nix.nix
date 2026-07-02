@@ -1,8 +1,16 @@
 # Nix daemon settings, garbage collection, and nixpkgs policy.
 {
-  flake.modules.nixos.nix = {
+  flake.modules.nixos.nix = { pkgs, ... }: {
     # Allow proprietary software (Nvidia drivers, Spotify, VSCode)
     nixpkgs.config.allowUnfree = true;
+
+    # Nicer rebuild UX: `nh os switch` builds, shows an nvd package diff,
+    # then activates — no need to pass the flake path every time.
+    programs.nh = {
+      enable = true;
+      flake = "/persist/nixos-configs";
+    };
+    environment.systemPackages = [ pkgs.nvd ];
 
     nix.gc = {
       automatic = true;

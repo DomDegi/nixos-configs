@@ -138,5 +138,11 @@
       enable = true;
       enableFishIntegration = true;
     };
+
+    # Fuzzy finder: Ctrl+R history, Ctrl+T files, Alt+C cd
+    programs.fzf = {
+      enable = true;
+      enableFishIntegration = true;
+    };
   };
 }

@@ -10,6 +10,12 @@
       #   pandoc notes.md -o notes.pdf --pdf-engine=tectonic
       pandoc
       tectonic
+
+      # Scanned PDFs -> searchable/copy-pasteable: `ocrmypdf in.pdf out.pdf`
+      ocrmypdf
+
+      # Modern LaTeX alternative for reports: `typst compile report.typ`
+      typst
     ];
   };
 }
