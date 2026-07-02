@@ -20,7 +20,6 @@
       rPackages.languageserver
 
       marksman # The standard Markdown LSP for autocompletion and links
-      pandoc # (Optional) For compiling Markdown into PDF files
 
       # Treesitter
       (pkgs.vimPlugins.nvim-treesitter.withPlugins (p: [
