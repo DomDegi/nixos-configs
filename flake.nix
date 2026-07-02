@@ -5,7 +5,13 @@
   inputs = {
     # Track the bleeding edge
     nixpkgs.url = "github:nixos/nixpkgs/nixos-unstable";
-    impermanence.url = "github:nix-community/impermanence";
+    impermanence = {
+      url = "github:nix-community/impermanence";
+      # Dedupe: impermanence only ships modules; its own nixpkgs/HM copies
+      # exist for its test suite and would otherwise bloat the lock file.
+      inputs.nixpkgs.follows = "nixpkgs";
+      inputs.home-manager.follows = "home-manager";
+    };
 
     # Dendritic pattern plumbing: flake-parts is the top-level module
     # system, import-tree auto-imports every .nix under ./modules.
