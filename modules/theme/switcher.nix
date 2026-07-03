@@ -21,15 +21,6 @@
       repoDir = "/persist/nixos-configs";
 
       raw = c: lib.removePrefix "#" c;
-      hexAt = c: off: (builtins.fromTOML "v = 0x${builtins.substring off 2 (raw c)}").v;
-
-      # ANSI truecolor escape prefixes for fastfetch's display.constants
-      esc = builtins.fromJSON ''"\u001b"'';
-      lerp = a: b: i: a + ((b - a) * i) / 9;
-      gradientStep = a: b: i:
-        let ch = off: toString (lerp (hexAt a off) (hexAt b off) i);
-        in "${esc}[38;2;${ch 0};${ch 2};${ch 4}m${esc}[1m";
-      gradient = a: b: map (gradientStep a b) (lib.range 0 9);
 
       footConf = t: pkgs.writeText "foot-theme.ini" ''
         [colors-dark]
@@ -73,60 +64,39 @@
         git_status = { style = "bold red"; };
       };
 
-      # The gradient-bars NixOS logo (borko17) pre-rendered to truecolor ANSI
-      # half-block art at build time: sixel in foot butchers alpha + gradients,
-      # plain ANSI text renders crisply everywhere.
-      logoAnsi = pkgs.runCommand "nixos-logo.ans" { } ''
-        ${pkgs.chafa}/bin/chafa -f symbols -c full --symbols half \
-          -s 26x13 ${../../config/fastfetch/nixos-logo.png} \
-          | ${pkgs.gnused}/bin/sed 's/\x1b\[?25[lh]//g' > $out
-      '';
-
-      # Gradient-bars NixOS logo (borko17) + the original clean key style:
-      # short icon keys with named ANSI colors (they follow the terminal
-      # palette, so rows re-theme automatically) and a 󰁔 separator. The
-      # per-theme gradient constants color the title and the footer row.
+      # The original clean fastfetch: builtin NixOS ASCII logo tinted from the
+      # palette, short icon keys with named ANSI colors (they follow the
+      # terminal palette, so rows re-theme automatically), 󰁔 separator —
+      # with blank lines separating the spec groups.
       fastfetchConf = t:
-        let
-          g = gradient t.ui.accent t.ui.secondary;
-          c = i: "{$" + toString i + "}"; # constant reference, e.g. {$4}
-        in
         pkgs.writeText "fastfetch-theme.jsonc" (builtins.toJSON {
           logo = {
-            type = "file-raw";
-            source = "${logoAnsi}";
-            padding = { top = 2; left = 2; right = 3; };
+            source = "nixos";
+            color = { "1" = t.ui.accent; "2" = t.ui.fg; };
+            padding = { top = 2; left = 2; right = 4; };
           };
           display = {
             separator = " 󰁔 ";
-            constants = g;
-            percent.type = 9; # colored percentage number, no bar
           };
           modules = [
             "break"
-            { type = "title"; color = { user = t.ui.accent; at = t.ui.fgDim; host = t.ui.secondary; }; }
+            { type = "title"; color = { user = "magenta"; host = "blue"; }; }
             "separator"
-            { type = "os"; key = " OS"; keyColor = "blue"; format = "{name} {version} {arch}"; }
+            { type = "os"; key = " OS"; keyColor = "blue"; }
             { type = "kernel"; key = " Kernel"; keyColor = "white"; }
             { type = "uptime"; key = "󰅐 Uptime"; keyColor = "yellow"; }
             { type = "packages"; key = "󰏖 Packages"; keyColor = "cyan"; }
+            "break"
             { type = "shell"; key = " Shell"; keyColor = "green"; }
             { type = "wm"; key = " WM"; keyColor = "blue"; }
             { type = "terminal"; key = " Terminal"; keyColor = "magenta"; }
-            { type = "cpu"; key = " CPU"; keyColor = "red"; }
-            { type = "gpu"; key = "󰾲 GPU"; keyColor = "yellow"; format = "{2}"; }
-            { type = "memory"; key = " Memory"; keyColor = "magenta"; }
-            { type = "disk"; key = "󰋊 Disk"; keyColor = "cyan"; folders = [ "/" ]; }
-            { type = "disk"; key = "󰆼 Shared"; keyColor = "cyan"; folders = [ "/mnt/shared" ]; }
-            { type = "battery"; key = "󰁹 Battery"; keyColor = "green"; }
-            { type = "display"; key = "󰍹 Display"; keyColor = "blue"; }
-            { type = "sound"; key = " Sound"; keyColor = "cyan"; }
-            { type = "bluetooth"; key = "󰂱 Bluetooth"; keyColor = "blue"; }
-            { type = "wifi"; key = " WiFi"; keyColor = "green"; format = "{4}"; }
-            { type = "localip"; key = "󰩟 Local IP"; keyColor = "yellow"; }
-            { type = "disk"; key = " OS Age"; keyColor = "white"; folders = [ "/persist" ]; format = "{create-time:10} ({days} days)"; }
             "break"
-            { type = "custom"; format = "   ${lib.concatStringsSep " " (map (i: "${c i}󱄅") (lib.reverseList (lib.range 1 10)))}"; }
+            { type = "cpu"; key = " CPU"; keyColor = "red"; }
+            { type = "memory"; key = " Memory"; keyColor = "magenta"; }
+            { type = "disk"; key = "󰋊 Disk"; keyColor = "cyan"; }
+            { type = "battery"; key = "󰁹 Battery"; keyColor = "green"; }
+            "break"
+            "colors"
           ];
         });
 
