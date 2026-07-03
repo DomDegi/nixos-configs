@@ -32,7 +32,7 @@
       gradient = a: b: map (gradientStep a b) (lib.range 0 9);
 
       footConf = t: pkgs.writeText "foot-theme.ini" ''
-        [colors]
+        [colors-dark]
         alpha=0.85
         background=${raw t.ui.bg}
         foreground=${raw t.ui.fg}
@@ -100,7 +100,8 @@
           };
           display = {
             separator = " ";
-            constants = g ++ [ "┌──────" "───────" "──────┐" ];
+            # short segments (4 cols x 10) so section titles survive ~100-col terminals
+            constants = g ++ [ "┌───" "────" "───┐" ];
           };
           modules = [
             "break"
