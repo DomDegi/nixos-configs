@@ -73,6 +73,15 @@
         git_status = { style = "bold red"; };
       };
 
+      # The gradient-bars NixOS logo (borko17) pre-rendered to truecolor ANSI
+      # half-block art at build time: sixel in foot butchers alpha + gradients,
+      # plain ANSI text renders crisply everywhere.
+      logoAnsi = pkgs.runCommand "nixos-logo.ans" { } ''
+        ${pkgs.chafa}/bin/chafa -f symbols -c full --symbols half \
+          -s 26x13 ${../../config/fastfetch/nixos-logo.png} \
+          | ${pkgs.gnused}/bin/sed 's/\x1b\[?25[lh]//g' > $out
+      '';
+
       # Gradient-bars NixOS logo (borko17) + the original clean key style:
       # short icon keys with named ANSI colors (they follow the terminal
       # palette, so rows re-theme automatically) and a 󰁔 separator. The
@@ -84,11 +93,9 @@
         in
         pkgs.writeText "fastfetch-theme.jsonc" (builtins.toJSON {
           logo = {
-            type = "auto";
-            source = "${../../config/fastfetch/nixos-logo.webp}";
-            height = 18;
-            width = 36;
-            padding = { top = 1; left = 2; right = 3; };
+            type = "file-raw";
+            source = "${logoAnsi}";
+            padding = { top = 2; left = 2; right = 3; };
           };
           display = {
             separator = " 󰁔 ";
