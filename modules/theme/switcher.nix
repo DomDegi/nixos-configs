@@ -81,21 +81,17 @@
           modules = [
             "break"
             { type = "title"; color = { user = "magenta"; host = "blue"; }; }
-            "separator"
             { type = "os"; key = " OS"; keyColor = "blue"; }
             { type = "kernel"; key = " Kernel"; keyColor = "white"; }
             { type = "uptime"; key = "󰅐 Uptime"; keyColor = "yellow"; }
             { type = "packages"; key = "󰏖 Packages"; keyColor = "cyan"; }
-            "break"
             { type = "shell"; key = " Shell"; keyColor = "green"; }
             { type = "wm"; key = " WM"; keyColor = "blue"; }
             { type = "terminal"; key = " Terminal"; keyColor = "magenta"; }
-            "break"
             { type = "cpu"; key = " CPU"; keyColor = "red"; }
             { type = "memory"; key = " Memory"; keyColor = "magenta"; }
             { type = "disk"; key = "󰋊 Disk"; keyColor = "cyan"; }
             { type = "battery"; key = "󰁹 Battery"; keyColor = "green"; }
-            "break"
             "colors"
           ];
         });
