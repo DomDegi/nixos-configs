@@ -83,6 +83,7 @@ sops secrets/secrets.yaml            # edit decrypted view in $EDITOR
 - `mkOutOfStoreSymlink` paths must be **absolute string literals**
   (`"/persist/nixos-configs/..."`); a `./relative` path silently freezes the
   file into the store (check with `readlink`, must not print `/nix/store/...`).
-- Never push the local `old-history` / `backup/pre-dendritic` branches: they
-  contain the pre-public history (inline password hash).
+- Never push the local `old-history` / `backup/pre-dendritic` /
+  `archive-persistent-home` branches: they contain the pre-public history
+  (inline password hash).
 - The age key never enters the repo; `.claude/` and `result*` are gitignored.

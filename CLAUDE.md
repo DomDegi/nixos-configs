@@ -34,5 +34,5 @@ a short overview — update its module tree only when files are added/removed.
 - Password/secrets: sops-nix, age key at `/persist/var/lib/sops-nix/key.txt`
   (never in repo). After password changes verify `/run/secrets-for-users/`
   and `getent shadow` BEFORE any reboot.
-- Never push `old-history` or `backup/pre-dendritic` (pre-public history
-  with inline password hash).
+- Never push `old-history`, `backup/pre-dendritic` or
+  `archive-persistent-home` (pre-public history with inline password hash).
