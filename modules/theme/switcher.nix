@@ -73,68 +73,53 @@
         git_status = { style = "bold red"; };
       };
 
-      # borko17-style layout: gradient box headers + tree keys. Named colors
-      # (percent bars etc.) resolve through the terminal palette and follow
-      # the theme automatically; only the gradient needs per-theme constants.
+      # Gradient-bars NixOS logo (borko17) + the original clean key style:
+      # short icon keys with named ANSI colors (they follow the terminal
+      # palette, so rows re-theme automatically) and a 󰁔 separator. The
+      # per-theme gradient constants color the title and the footer row.
       fastfetchConf = t:
         let
           g = gradient t.ui.accent t.ui.secondary;
           c = i: "{$" + toString i + "}"; # constant reference, e.g. {$4}
-          # header row: 10 gradient box segments, left-to-right or reversed
-          boxRow = title: order:
-            lib.concatStrings (lib.imap0
-              (idx: i: "${c i}${c (if idx == 0 then 11 else if idx == 9 then 13 else 12)}")
-              order)
-            + " ${title} ";
-          ltr = lib.range 1 10;
-          rtl = lib.reverseList ltr;
-          header = title: { type = "custom"; format = boxRow title ltr; };
-          headerR = title: { type = "custom"; format = boxRow title rtl; };
-          pct = { type = 3; green = 30; yellow = 70; };
         in
         pkgs.writeText "fastfetch-theme.jsonc" (builtins.toJSON {
           logo = {
-            source = "nixos";
-            color = { "1" = t.ui.accent; "2" = t.ui.secondary; };
-            padding = { top = 2; left = 2; right = 3; };
+            type = "auto";
+            source = "${../../config/fastfetch/nixos-logo.webp}";
+            height = 18;
+            width = 36;
+            padding = { top = 1; left = 2; right = 3; };
           };
           display = {
-            separator = " ";
-            # short segments (4 cols x 10) so section titles survive ~100-col terminals
-            constants = g ++ [ "┌───" "────" "───┐" ];
+            separator = " 󰁔 ";
+            constants = g;
+            percent.type = 9; # colored percentage number, no bar
           };
           modules = [
             "break"
             { type = "title"; color = { user = t.ui.accent; at = t.ui.fgDim; host = t.ui.secondary; }; }
-            (header "Hardware")
-            { type = "host"; key = "${c 1}├ 󰌢  PC        "; }
-            { type = "cpu"; key = "${c 2}├   CPU       "; }
-            { type = "gpu"; key = "${c 3}├ 󰾲  GPU       "; }
-            { type = "display"; key = "${c 4}├ 󰍹  Display   "; }
-            { type = "sound"; key = "${c 5}├   Sound     "; }
-            { type = "battery"; key = "${c 6}├ 󰁹  Battery   "; }
-            { type = "memory"; key = "${c 7}├   Memory    "; percent = pct; }
-            { type = "disk"; key = "${c 8}├   NixOS     "; folders = [ "/" ]; percent = pct; }
-            { type = "disk"; key = "${c 9}└   Shared    "; folders = [ "/mnt/shared" ]; percent = pct; }
-            (headerR "Software")
-            { type = "os"; key = "${c 10}├   Distro    "; format = "{name} {version} {arch}"; }
-            { type = "kernel"; key = "${c 9}├   Kernel    "; }
-            { type = "packages"; key = "${c 8}├ 󰏖  Packages  "; }
-            { type = "shell"; key = "${c 7}├   Shell     "; }
-            { type = "terminal"; key = "${c 6}├   Terminal  "; }
-            { type = "terminalfont"; key = "${c 5}├ 󰛖  Term Font "; }
-            { type = "lm"; key = "${c 4}├ 󰧨  Login     "; }
-            { type = "wm"; key = "${c 3}└   WM        "; }
-            (header "Connectivity")
-            { type = "bluetooth"; key = "${c 1}├ 󰂱  Bluetooth "; }
-            { type = "wifi"; key = "${c 3}├   WiFi      "; }
-            { type = "localip"; key = "${c 5}└ 󰩟  Local IP  "; }
-            (headerR "Time")
-            { type = "datetime"; key = "${c 10}├ 󰥔  Date/Time "; }
-            { type = "disk"; key = "${c 8}├   OS Age    "; folders = [ "/persist" ]; format = "{create-time:10} ({days} days)"; }
-            { type = "uptime"; key = "${c 6}└   Uptime    "; }
+            "separator"
+            { type = "os"; key = " OS"; keyColor = "blue"; format = "{name} {version} {arch}"; }
+            { type = "kernel"; key = " Kernel"; keyColor = "white"; }
+            { type = "uptime"; key = "󰅐 Uptime"; keyColor = "yellow"; }
+            { type = "packages"; key = "󰏖 Packages"; keyColor = "cyan"; }
+            { type = "shell"; key = " Shell"; keyColor = "green"; }
+            { type = "wm"; key = " WM"; keyColor = "blue"; }
+            { type = "terminal"; key = " Terminal"; keyColor = "magenta"; }
+            { type = "cpu"; key = " CPU"; keyColor = "red"; }
+            { type = "gpu"; key = "󰾲 GPU"; keyColor = "yellow"; format = "{2}"; }
+            { type = "memory"; key = " Memory"; keyColor = "magenta"; }
+            { type = "disk"; key = "󰋊 Disk"; keyColor = "cyan"; folders = [ "/" ]; }
+            { type = "disk"; key = "󰆼 Shared"; keyColor = "cyan"; folders = [ "/mnt/shared" ]; }
+            { type = "battery"; key = "󰁹 Battery"; keyColor = "green"; }
+            { type = "display"; key = "󰍹 Display"; keyColor = "blue"; }
+            { type = "sound"; key = " Sound"; keyColor = "cyan"; }
+            { type = "bluetooth"; key = "󰂱 Bluetooth"; keyColor = "blue"; }
+            { type = "wifi"; key = " WiFi"; keyColor = "green"; format = "{4}"; }
+            { type = "localip"; key = "󰩟 Local IP"; keyColor = "yellow"; }
+            { type = "disk"; key = " OS Age"; keyColor = "white"; folders = [ "/persist" ]; format = "{create-time:10} ({days} days)"; }
             "break"
-            { type = "custom"; format = "     ${lib.concatStringsSep " " (map (i: "${c i}󱄅") (lib.reverseList (lib.range 1 10)))}"; }
+            { type = "custom"; format = "   ${lib.concatStringsSep " " (map (i: "${c i}󱄅") (lib.reverseList (lib.range 1 10)))}"; }
           ];
         });
 
