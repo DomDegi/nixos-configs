@@ -23,6 +23,10 @@ a short overview — update its module tree only when files are added/removed.
 - `plugins.enabled` (Noctalia) has a single owner: `modules/noctalia.nix`.
   Noctalia's runtime config is `~/.local/state/noctalia/settings.toml`
   (persisted); `programs.noctalia.settings` is only a first-run seed.
+- Colors have a single source: `modules/theme/_palettes.nix` (consumed by
+  theme/switcher.nix, theming, terminal, locale, greeter). Never hardcode a
+  hex color in a module; the `// theme:` markers in `config/niri/config.kdl`
+  are load-bearing (theme-switch seds those lines).
 - `mkOutOfStoreSymlink` takes absolute string literals only
   (`"/persist/nixos-configs/..."`), never `./paths` (silent store-freeze).
 - Persisting an already-existing **file** needs it moved under `/persist`

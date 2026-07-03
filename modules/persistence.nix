@@ -68,6 +68,10 @@
           # forgets which audio device/profile you last used.
           ".local/state/wireplumber"
 
+          # Active theme selection + per-theme config symlinks that
+          # foot/starship/fastfetch/nvim resolve through (theme-switch)
+          ".local/state/theme"
+
           # Desktop entries created at runtime (e.g. Claude Code URL handler)
           ".local/share/applications"
 

@@ -1,9 +1,11 @@
 # ❄️ NixOS · Niri · Noctalia — Dendritic Configuration
 
 Personal NixOS flake for a Lenovo Legion 5 (hybrid AMD/Nvidia), built around the
-**Niri** scrollable tiling compositor, the **Noctalia v5** shell, and a full
-**Catppuccin Mocha (Lavender)** theme — on an **ephemeral BTRFS root** that is
-wiped on every boot (Impermanence).
+**Niri** scrollable tiling compositor, the **Noctalia v5** shell, and a
+**runtime-switchable theme system** — Catppuccin Lavender by default; Tokyo
+Night, Gruvbox, Nord, Rosé Pine, Dracula and Everforest one bar-click away
+(`theme-switch`) — on an **ephemeral BTRFS root** that is wiped on every boot
+(Impermanence).
 
 - **Compositor:** [Niri](https://github.com/YaLTeR/niri) · **Bar/Shell:** [Noctalia v5](https://github.com/noctalia-dev/noctalia) with custom Luau widgets
 - **Login:** Ly (TTY, Catppuccin) · **Terminal:** Foot · **Prompt:** Fish + Starship
@@ -40,9 +42,10 @@ hardware-configuration.nix   # generated; kept OUT of modules/ on purpose
 secrets/secrets.yaml         # encrypted secrets (safe to publish)
 config/                      # raw configs, symlinked out-of-store (see below)
   niri/config.kdl  nvim/init.lua  vscode/settings.json  zed/settings.json
-  noctalia/plugins/{battery-conserve,display-mode,airpods-audio}/
+  noctalia/plugins/{battery-conserve,display-mode,airpods-audio,theme-switcher}/
 modules/                     # one feature per file — auto-imported
   hosts/nixos.nix  home-manager.nix  persistence.nix  ephemeral-root.nix
+  theme/_palettes.nix  theme/switcher.nix  # all colors + theme-switch tooling
   secrets.nix  users.nix  boot.nix  nix.nix  locale.nix  network.nix
   nvidia.nix  audio.nix  bluetooth-airpods.nix  battery-conserve.nix
   display-mode.nix  niri.nix  greeter.nix  theming.nix  terminal.nix
@@ -103,10 +106,13 @@ nh os switch                                          # apply (shows package dif
 nix flake check                                       # eval sanity
 nix flake update && nh os switch                      # upgrade everything
 sudo nixos-rebuild switch --flake .#nixos             # plain fallback
+theme-switch list && theme-switch tokyo-night         # switch the whole rice
 ```
 
 More recipes in [docs/operations.md](docs/operations.md).
 
 Custom scripts wired to Noctalia bar widgets: `battery-conserve` (Lenovo 60%
 charge cap), `display-mode` (extend ↔ mirror via wl-mirror, also on Mod+P),
-`airpods-audio` (A2DP music ↔ HFP call profile with mic fixes).
+`airpods-audio` (A2DP music ↔ HFP call profile with mic fixes),
+`theme-switch` (palette menu — the whole desktop follows
+`modules/theme/_palettes.nix`).

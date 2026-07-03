@@ -197,13 +197,14 @@ layout {
         // - CSS-like notation: "rgb(255, 127, 0)", rgba(), hsl() and a few others.
 
         // Color of the ring on the active monitor.
-        active-color "#b4befe"
+        // (the trailing "// theme:" tags are markers for theme-switch — keep them)
+        active-color "#b4befe" // theme:accent
 
         // Color of the ring on inactive monitors.
         //
         // The focus ring only draws around the active window, so the only place
         // where you can see its inactive-color is on other monitors.
-        inactive-color "#585b70"
+        inactive-color "#585b70" // theme:outline
 
         // You can also use gradients. They take precedence over solid colors.
         // Gradients are rendered the same as CSS linear-gradient(angle, from, to).
@@ -293,8 +294,8 @@ layout {
 }
 
 overview {
-    // Fills the background of the overview with a translucent Catppuccin Base color
-    backdrop-color "#1e1e2ecc"
+    // Fills the background of the overview with a translucent theme Base color
+    backdrop-color "#1e1e2ecc" // theme:backdrop
 }
 
 // Add lines like this to spawn processes at startup.

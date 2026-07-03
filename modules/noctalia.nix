@@ -32,6 +32,7 @@
           "domdegi/battery-conserve"
           "domdegi/display-mode"
           "domdegi/airpods-audio"
+          "domdegi/theme-switcher"
         ];
       };
     };

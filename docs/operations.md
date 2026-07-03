@@ -42,6 +42,32 @@ After a rebuild that changes HM-managed files, check activation output for
   (single owner — never set that list elsewhere), then add the widget to the
   bar via Noctalia's GUI (or `~/.local/state/noctalia/settings.toml`).
 
+## Theme switching
+
+```bash
+theme-switch list                # available palettes (● = active)
+theme-switch tokyo-night        # switch everything
+theme-switch reapply            # after a rebuild, restore a non-default theme
+```
+
+Or click the palette icon in the bar → pick from the menu. What happens:
+Noctalia/niri/GTK/VS Code/Zed change **immediately**; foot windows, the
+fish/starship/fastfetch stack and nvim pick it up on **next launch**; the TTY
+console and the Ly greeter always show the **default** palette (rebuild-only).
+
+- **Add a theme**: one attrset in `modules/theme/_palettes.nix` (colors +
+  nvim/VS Code/Zed/GTK bindings — see the header there), rebuild. It appears
+  in `theme-switch list` and the bar menu automatically. If it has a GTK
+  theme, its package is installed automatically too.
+- **A rebuild resets GTK/niri-defaults to the default palette** (declarative
+  files re-assert it). Run `theme-switch reapply` if you were on another theme.
+- VS Code needs the theme's extension; theme-switch auto-installs it in the
+  background on first switch (needs network). Zed auto-installs via
+  `auto_install_extensions` in its settings.
+- nvim theme plugins download on first nvim start after a rebuild (lazy.nvim).
+- Don't delete the `// theme:accent|outline|backdrop` markers in
+  `config/niri/config.kdl` — theme-switch rewrites exactly those lines.
+
 ## Secrets (sops-nix)
 
 ```bash

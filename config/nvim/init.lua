@@ -52,17 +52,32 @@ vim.opt.rtp:prepend(lazypath)
 -- ==========================================================================
 -- 3. PLUGINS & CONFIGURATION
 -- ==========================================================================
+-- ==========================================================================
+-- ACTIVE THEME (managed by theme-switch — see modules/theme/switcher.nix)
+-- Reads the colorscheme name from ~/.local/state/theme/nvim; every theme in
+-- modules/theme/_palettes.nix has its plugin installed below.
+-- ==========================================================================
+local function active_colorscheme()
+  local f = io.open(vim.fn.expand("~/.local/state/theme/nvim"), "r")
+  if f then
+    local name = f:read("*l")
+    f:close()
+    if name and #name > 0 then return name end
+  end
+  return "catppuccin-mocha"
+end
+
 require("lazy").setup({
-  
-  -- Catppuccin Theme
-  { 
-    "catppuccin/nvim", 
-    name = "catppuccin", 
-    priority = 1000,
-    config = function()
-      vim.cmd.colorscheme("catppuccin-mocha")
-    end
-  },
+
+  -- Theme plugins (one per palette in _palettes.nix); only the active one
+  -- is loaded, picked via the state file above.
+  { "catppuccin/nvim", name = "catppuccin", lazy = true },
+  { "folke/tokyonight.nvim", lazy = true },
+  { "ellisonleao/gruvbox.nvim", lazy = true },
+  { "shaunsingh/nord.nvim", lazy = true },
+  { "rose-pine/neovim", name = "rose-pine", lazy = true },
+  { "Mofiqul/dracula.nvim", lazy = true },
+  { "neanias/everforest-nvim", lazy = true },
 
   -- Telescope (Fuzzy Finder)
   {
@@ -240,6 +255,12 @@ require("lazy").setup({
   }
 
 })
+
+-- Apply the active theme (lazy.nvim auto-loads the matching theme plugin).
+-- pcall: a bad/missing state file must never break startup.
+if not pcall(vim.cmd.colorscheme, active_colorscheme()) then
+  vim.cmd.colorscheme("catppuccin-mocha")
+end
 
 -- ==========================================================================
 -- 4. PERSONAL KEYBINDINGS

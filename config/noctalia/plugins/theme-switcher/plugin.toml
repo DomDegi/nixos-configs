@@ -1,0 +1,22 @@
+id           = "domdegi/theme-switcher"
+name         = "Theme Switcher"
+version      = "1.0.0"
+min_noctalia = "5.0.0"
+author       = "domdegi"
+license      = "MIT"
+icon         = "palette"
+description  = "Switch the whole rice between the palettes defined in nixos-configs (runs theme-switch)."
+tags         = ["Bar"]
+
+[[widget]]
+id    = "widget"
+entry = "widget.luau"
+
+# The theme menu opened by the bar widget.
+[[panel]]
+id        = "panel"
+entry     = "panel.luau"
+width     = 320
+height    = 420
+placement = "floating"
+position  = "center"

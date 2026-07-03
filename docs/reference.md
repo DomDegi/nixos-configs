@@ -179,12 +179,56 @@ neededForUsers secrets.
 Terminal life: foot, fish, starship, fastfetch, zoxide and the modern
 CLI replacements, plus baseline system CLI tools.
 
+## `theme/_palettes.nix`
+
+*Contributes to: flake-parts*
+
+Theme palettes — the single source of truth for every color in this config.
+Underscore prefix: NOT auto-imported; consumers do
+  palettes = import ./theme/_palettes.nix;   (adjust the relative path)
+
+Adding a theme = adding one attrset here. Everything else (foot/starship/
+fastfetch configs, the Noctalia colorscheme, the theme-switch script and its
+bar menu) is generated from it by modules/theme/switcher.nix.
+
+Field contract (all colors "#rrggbb"):
+  name       display name; also the Noctalia colorscheme folder name
+  dark       true for dark themes (drives Noctalia darkMode pairing)
+  ui         role colors: bg bgDim surface outline fg fgDim
+             accent secondary tertiary error
+  ansi       the 16 terminal colors (black..white, bright*)
+  apps.nvim      lazy.nvim plugin repo + :colorscheme name
+  apps.vscode    workbench.colorTheme + marketplace extension id
+  apps.zed       theme name + zed extension id ("" = built-in)
+  apps.gtk       GTK theme dir name + nixpkgs package attr ("" = none)
+
+## `theme/switcher.nix`
+
+*Contributes to: homeManager*
+
+Runtime theme switching across the whole rice, generated from
+_palettes.nix (the single source of truth for colors).
+
+For every palette this builds: foot colors, a starship config, a fastfetch
+config (gradient layout) and a Noctalia colorscheme. The `theme-switch`
+script repoints symlinks under ~/.local/state/theme (persisted), updates
+VS Code/Zed/niri/GTK/Noctalia in place, and is driven from the Noctalia bar
+via the domdegi/theme-switcher plugin (widget button -> panel menu).
+
+Reach per app:
+  instant ......... noctalia, niri (live reload), GTK, VS Code, Zed
+  next launch ..... foot windows, starship/fastfetch (new shells), nvim
+  rebuild-only .... TTY console + Ly greeter (always the default palette)
+
 ## `theming.nix`
 
 *Contributes to: homeManager nixos*
 
-Catppuccin Mocha (lavender) everywhere: GTK, cursors, icons, fonts,
-dconf/xfconf, session variables. System + user halves of the same feature.
+GTK, cursors, icons, fonts, dconf/xfconf, session variables — themed from
+modules/theme/_palettes.nix. The DEFAULT palette is baked in here (what a
+rebuild asserts); theme-switch retargets GTK at runtime, and every
+palette's GTK theme package is installed so switching always has its
+target ("theme-switch reapply" restores a runtime choice after a rebuild).
 
 ## `thunar.nix`
 

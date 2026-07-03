@@ -1,4 +1,13 @@
 {
     "theme": "Catppuccin Mocha",
-    "buffer_font_family": "JetBrainsMono Nerd Font"
+    "buffer_font_family": "JetBrainsMono Nerd Font",
+    "auto_install_extensions": {
+        "catppuccin": true,
+        "tokyo-night": true,
+        "gruvbox": true,
+        "nord": true,
+        "rose-pine": true,
+        "dracula": true,
+        "everforest": true
+    }
 }

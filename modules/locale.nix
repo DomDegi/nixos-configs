@@ -1,6 +1,12 @@
 # Time zone, locales, console keymap and TTY theming.
 {
-  flake.modules.nixos.locale = {
+  flake.modules.nixos.locale = { lib, ... }:
+    let
+      palettes = import ./theme/_palettes.nix;
+      t = palettes.themes.${palettes.default};
+      raw = c: lib.removePrefix "#" c;
+    in
+    {
     time.timeZone = "Europe/Rome";
     i18n.defaultLocale = "en_US.UTF-8";
 
@@ -16,26 +22,27 @@
       LC_TIME = "it_IT.UTF-8";
     };
 
-    # Set Italian Keyboard map and Catppuccin TTY Colors!
+    # Italian keyboard map + TTY colors from the DEFAULT palette
+    # (modules/theme/_palettes.nix — the console can't switch at runtime)
     console = {
       keyMap = "it";
-      colors = [
-        "1e1e2e" # 0: Base (Background)
-        "f38ba8" # 1: Red
-        "a6e3a1" # 2: Green
-        "f9e2af" # 3: Yellow
-        "89b4fa" # 4: Blue
-        "f5c2e7" # 5: Magenta (Pink)
-        "94e2d5" # 6: Cyan (Teal)
-        "cdd6f4" # 7: Text (Foreground)
-        "585b70" # 8: Bright Black (Surface 2)
-        "f38ba8" # 9: Bright Red
-        "a6e3a1" # 10: Bright Green
-        "f9e2af" # 11: Bright Yellow
-        "89b4fa" # 12: Bright Blue
-        "f5c2e7" # 13: Bright Magenta
-        "94e2d5" # 14: Bright Cyan
-        "a6adc8" # 15: Bright White
+      colors = map raw [
+        t.ui.bg # 0: background
+        t.ansi.red
+        t.ansi.green
+        t.ansi.yellow
+        t.ansi.blue
+        t.ansi.magenta
+        t.ansi.cyan
+        t.ui.fg # 7: foreground
+        t.ansi.brightBlack
+        t.ansi.brightRed
+        t.ansi.brightGreen
+        t.ansi.brightYellow
+        t.ansi.brightBlue
+        t.ansi.brightMagenta
+        t.ansi.brightCyan
+        t.ansi.brightWhite
       ];
     };
 
