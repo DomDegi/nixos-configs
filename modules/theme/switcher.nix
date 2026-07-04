@@ -2,7 +2,7 @@
 # _palettes.nix (the single source of truth for colors).
 #
 # For every palette this builds: foot colors, a starship config, a fastfetch
-# config (gradient layout) and a Noctalia colorscheme. The `theme-switch`
+# config (prompt-matched ╭─ frame layout) and a Noctalia colorscheme. The `theme-switch`
 # script repoints symlinks under ~/.local/state/theme (persisted), updates
 # VS Code/Zed/niri/GTK/Noctalia in place, and is driven from the Noctalia bar
 # via the domdegi/theme-switcher plugin (widget button -> panel menu).
@@ -64,35 +64,66 @@
         git_status = { style = "bold red"; };
       };
 
-      # The original clean fastfetch: builtin NixOS ASCII logo tinted from the
-      # palette, short icon keys with named ANSI colors (they follow the
-      # terminal palette, so rows re-theme automatically), 󰁔 separator —
-      # with blank lines separating the spec groups.
+      # Fastfetch styled after the starship prompt (╭─ frame in the muted
+      # color, role colors from the palette instead of the ANSI rainbow), so
+      # the fetch flows visually into the prompt below it. Icons are strictly
+      # base-plane Nerd Font glyphs (U+E000–U+F8FF): the plane-15 Material
+      # ones (󰅐 󰏖 󰋊 󰁹) render double-width in foot and break key alignment.
+      # `key.width` positions all values in one column via absolute cursor
+      # moves, so the embedded color escapes in the keys don't affect it.
       fastfetchConf = t:
+        let
+          # "#rrggbb" -> truecolor SGR params for fastfetch {#...} placeholders
+          sgr = c:
+            let d = i: toString (lib.fromHexString (builtins.substring i 2 (raw c)));
+            in "38;2;${d 0};${d 2};${d 4}";
+          # leading 0: clears the bold+cyan default key style fastfetch
+          # emits before the key format
+          frame = "{#0;${sgr t.ui.fgDim}}";
+          # icons by BMP codepoint (Nix has no \u escapes; JSON does). Keeps
+          # raw PUA glyphs out of the source, where editors/tools mangle them.
+          glyph = cp: builtins.fromJSON ''"\u${cp}"'';
+          key = color: cp: text:
+            "${frame}│ {#${sgr color}}${glyph cp} {#${sgr t.ui.fg}}${text}";
+          bar = { type = "custom"; format = "${frame}│"; };
+        in
         pkgs.writeText "fastfetch-theme.jsonc" (builtins.toJSON {
           logo = {
             source = "nixos";
-            color = { "1" = t.ui.accent; "2" = t.ui.fg; };
-            padding = { top = 2; left = 2; right = 4; };
+            # the builtin ascii has 6 slots, one per blade: odd/even alternate
+            color = {
+              "1" = t.ui.accent; "3" = t.ui.accent; "5" = t.ui.accent;
+              "2" = t.ui.secondary; "4" = t.ui.secondary; "6" = t.ui.secondary;
+            };
+            padding = { top = 1; left = 2; right = 5; };
           };
           display = {
-            separator = " 󰁔 ";
+            separator = "  ";
+            key.width = 16;
           };
           modules = [
             "break"
-            { type = "title"; color = { user = "magenta"; host = "blue"; }; }
-            { type = "os"; key = " OS"; keyColor = "blue"; }
-            { type = "kernel"; key = " Kernel"; keyColor = "white"; }
-            { type = "uptime"; key = "󰅐 Uptime"; keyColor = "yellow"; }
-            { type = "packages"; key = "󰏖 Packages"; keyColor = "cyan"; }
-            { type = "shell"; key = " Shell"; keyColor = "green"; }
-            { type = "wm"; key = " WM"; keyColor = "blue"; }
-            { type = "terminal"; key = " Terminal"; keyColor = "magenta"; }
-            { type = "cpu"; key = " CPU"; keyColor = "red"; }
-            { type = "memory"; key = " Memory"; keyColor = "magenta"; }
-            { type = "disk"; key = "󰋊 Disk"; keyColor = "cyan"; }
-            { type = "battery"; key = "󰁹 Battery"; keyColor = "green"; }
-            "colors"
+            {
+              type = "title";
+              format = "${frame}╭─── {#1;${sgr t.ui.accent}}{user-name}{#0}${frame}@{#1;${sgr t.ui.secondary}}{host-name}";
+            }
+            bar
+            { type = "os"; key = key t.ui.accent "f313" "OS"; }
+            { type = "kernel"; key = key t.ui.accent "f17c" "Kernel"; }
+            { type = "uptime"; key = key t.ui.accent "f017" "Uptime"; }
+            { type = "packages"; key = key t.ui.accent "f187" "Packages"; }
+            bar
+            { type = "shell"; key = key t.ui.secondary "f120" "Shell"; }
+            { type = "wm"; key = key t.ui.secondary "f2d0" "WM"; }
+            { type = "terminal"; key = key t.ui.secondary "e795" "Terminal"; }
+            bar
+            { type = "cpu"; key = key t.ui.tertiary "f2db" "CPU"; }
+            { type = "gpu"; key = key t.ui.tertiary "f108" "GPU"; }
+            { type = "memory"; key = key t.ui.tertiary "f0e4" "Memory"; }
+            { type = "disk"; key = key t.ui.tertiary "f0a0" "Disk"; }
+            { type = "battery"; key = key t.ui.tertiary "f240" "Battery"; }
+            bar
+            { type = "colors"; key = "${frame}╰───"; symbol = "circle"; }
           ];
         });
 

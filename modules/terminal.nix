@@ -26,7 +26,7 @@
       settings = {
         main = {
           term = "xterm-256color";
-          font = "JetBrainsMono Nerd Font:size=11";
+          font = "JetBrainsMono Nerd Font:size=10";
           pad = "10x10";
           include = "~/.local/state/theme/foot.ini";
         };
