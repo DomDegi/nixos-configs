@@ -39,9 +39,10 @@ Every `.nix` file under `modules/` is auto-imported by import-tree and is one
 
 | Module | Does |
 |---|---|
-| `theme/_palettes.nix` | **Single source of truth for every color**: 7 palettes (Catppuccin Lavender default, Tokyo Night, Gruvbox, Nord, Rosé Pine, Dracula, Everforest) with ANSI-16 + UI roles + per-app bindings (nvim colorscheme, VS Code/Zed theme names, GTK theme). `_`-prefixed → imported manually, not by import-tree. **Adding a theme = adding one attrset here.** |
-| `theme/switcher.nix` | Generates per-palette foot/starship/fastfetch configs + Noctalia custom palettes; ships `theme-switch` (repoints `~/.local/state/theme` symlinks, edits VS Code/Zed settings + niri `// theme:` markers, dconf GTK, Noctalia IPC) and links the `domdegi/theme-switcher` bar widget + panel menu. |
-| `theming.nix` | GTK3/4 + Papirus icons + cursors + fonts + dconf/xfconf + GTK bookmarks. Default GTK theme name comes from the palette; **all** palettes' GTK theme packages are installed so runtime switching always has its target. |
+| `theme/_palettes.nix` | **Single source of truth for every color**: 7 palettes (Catppuccin Lavender default, Tokyo Night, Gruvbox, Nord, Rosé Pine, Dracula, Everforest) with ANSI-16 + UI roles + per-app bindings (nvim colorscheme, VS Code/Zed theme names, GTK theme, Firefox AMO theme id+slug). `_`-prefixed → imported manually, not by import-tree. **Adding a theme = adding one attrset here.** |
+| `theme/switcher.nix` | Generates per-palette foot/starship/fastfetch/GTK-settings.ini configs + Noctalia custom palettes; ships `theme-switch` (repoints `~/.local/state/theme` symlinks incl. `gtk.ini`, edits VS Code/Zed settings + niri `// theme:` markers, dconf GTK, `papirus-folders` recolor + `thunar -q`, Noctalia IPC, Firefox theme via user.js + extensions.json, `spicetify config color_scheme` + `refresh`, Obsidian per-vault `accentColor`) and links the `domdegi/theme-switcher` bar widget + panel menu. Picking a theme in the panel transitions it in place to a wallpaper thumbnail roster for the new theme (no separate auto-opened panel). |
+| `theming.nix` | GTK3/4 + Papirus icons + cursors + fonts + dconf/xfconf + GTK bookmarks. Default GTK theme name comes from the palette; **all** palettes' GTK theme packages are installed so runtime switching always has its target. Deliberately does NOT set `GTK_THEME` (it would pin GTK3 apps and defeat theme-switch); `gtk-{3,4}.0/settings.ini` are overridden by `theme/switcher.nix` to route through the state dir. Keeps a **writable Papirus-Dark copy** in `~/.local/share/icons` (shadows the store; refreshed on package updates) so `papirus-folders` can recolor folder icons per palette (`apps.papirus`) — the copy dereferences the upstream theme's `../Papirus/<size>` symlinks (32/48/64/96/128/84/8x8) since those break once copied out of the store; only `places` is a real writable dir per size, everything else stays symlinked absolute into the store. |
+| `wallpaper.nix` | Per-theme wallpapers in `~/Pictures/Wallpapers/<slug>/` (folders auto-created from the palette list): `wallpaper-pick` script (list/status/set-by-index → `noctalia msg wallpaper-set`) + `domdegi/wallpaper-picker` Noctalia widget (bar button + standalone panel menu rendering `ui.image` thumbnails in a 2-col grid, active one bordered) for picking a wallpaper without switching themes. |
 
 ## Desktop
 
@@ -62,7 +63,8 @@ Every `.nix` file under `modules/` is auto-imported by import-tree and is one
 | `nvim.nix` | Neovim + LSPs (nil, lua, pyright, clang-tools, R, marksman) + treesitter bundle; `config/nvim/init.lua` via out-of-store symlink (colorscheme follows `~/.local/state/theme/nvim`). |
 | `documents.nix` | HM: **markitdown** (anything→md), pandoc + tectonic (md→PDF), ocrmypdf (scans→searchable), typst. |
 | `desktop-apps.nix` | Spotify, Obsidian, LibreOffice, media tools (mpv/imv/snapshot/kooha/calculator), zathura, seahorse/libsecret, webeep-sync (keyring-wrapped); `xdg.mimeApps` defaults. |
-| `firefox.nix` | System-level enable only; profile lives in persisted `~/.config/mozilla`. |
+| `firefox.nix` | System enable + enterprise policies that force-install every palette's AMO theme addon; `theme-switch` activates one via `extensions.activeThemeID` in each profile's user.js (applies on next launch). Profile lives in persisted `~/.config/mozilla`. |
+| `spicetify.nix` | Spotify skinned with the active palette: keeps a **writable copy** of Spotify under `~/.local/share/spicetify-spotify` (store path is read-only; refreshed on Spotify updates), patches it with `spicetify backup apply` (only marked done on actual success, so a failed attempt retries next activation instead of getting stuck unthemed), generates one color scheme per palette from `_palettes.nix`, and shadows `spotify` (hiPrio bin + desktop entry) so the patched copy is what runs. `theme-switch` flips the scheme with `spicetify refresh`. |
 | `vscode.nix` | VS Code; `config/vscode/settings.json` via out-of-store symlink (GUI edits land in git). |
 | `zed.nix` | Zed; `config/zed/settings.json` via out-of-store symlink. |
 
@@ -71,7 +73,8 @@ Every `.nix` file under `modules/` is auto-imported by import-tree and is one
 Hand-edited files symlinked out-of-store (writable, git-tracked):
 `niri/config.kdl` (keep the `// theme:` marker comments — theme-switch seds
 those lines), `nvim/init.lua`, `vscode/settings.json`, `zed/settings.json`
-(the last two are also *written* by theme-switch), and the four Noctalia Luau
+(the last two are also *written* by theme-switch), and five Noctalia Luau
 plugins (`battery-conserve`, `display-mode`, `airpods-audio`,
-`theme-switcher` — the last one adds a `panel.luau` menu), linked store-copied
-into `~/.local/share/noctalia/plugins/` by their feature modules.
+`theme-switcher` and `wallpaper-picker` — the last two each add a
+`panel.luau` menu), linked store-copied into `~/.local/share/noctalia/plugins/`
+by their feature modules.

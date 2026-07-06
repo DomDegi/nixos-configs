@@ -2,14 +2,23 @@
 # _palettes.nix (the single source of truth for colors).
 #
 # For every palette this builds: foot colors, a starship config, a fastfetch
-# config (prompt-matched ╭─ frame layout) and a Noctalia colorscheme. The `theme-switch`
-# script repoints symlinks under ~/.local/state/theme (persisted), updates
-# VS Code/Zed/niri/GTK/Noctalia in place, and is driven from the Noctalia bar
-# via the domdegi/theme-switcher plugin (widget button -> panel menu).
+# config (prompt-matched ╭─ frame layout), a GTK settings.ini and a Noctalia
+# colorscheme. The `theme-switch` script repoints symlinks under
+# ~/.local/state/theme (persisted), updates VS Code/Zed/niri/GTK/Noctalia in
+# place, activates the palette's Firefox theme addon (user.js + extensions.json),
+# flips the spicetify color scheme, recolors the Papirus folder icons
+# (papirus-folders on the writable copy from theming.nix) and Obsidian's
+# accent color per vault. Driven from the Noctalia bar via
+# domdegi/theme-switcher; on a successful pick, its panel transitions in
+# place to a thumbnail roster of the new theme's wallpapers (same grid as
+# the standalone domdegi/wallpaper-picker, which still exists on its own
+# for picking a wallpaper without switching themes).
 #
 # Reach per app:
-#   instant ......... noctalia, niri (live reload), GTK, VS Code, Zed
-#   next launch ..... foot windows, starship/fastfetch (new shells), nvim
+#   instant ......... noctalia, niri (live reload), VS Code, Zed, GTK4/libadwaita
+#   next launch ..... foot windows, starship/fastfetch (new shells), nvim,
+#                     Thunar & other GTK3 apps, Firefox, Spotify (spicetify),
+#                     Obsidian
 #   rebuild-only .... TTY console + Ly greeter (always the default palette)
 {
   flake.modules.homeManager.theme-switcher = { pkgs, lib, config, ... }:
@@ -43,6 +52,19 @@
         bright5=${raw t.ansi.brightMagenta}
         bright6=${raw t.ansi.brightCyan}
         bright7=${raw t.ansi.brightWhite}
+      '';
+
+      # GTK3/GTK4 read this at app launch; ~/.config/gtk-{3,4}.0/settings.ini
+      # both symlink here (via the state dir) so theme-switch can retarget it.
+      # Static values (icons/font/cursor) mirror theming.nix.
+      gtkIni = t: pkgs.writeText "gtk-settings.ini" ''
+        [Settings]
+        gtk-theme-name=${t.apps.gtk.theme}
+        gtk-icon-theme-name=Papirus-Dark
+        gtk-font-name=JetBrainsMono Nerd Font 11
+        gtk-cursor-theme-name=catppuccin-mocha-dark-cursors
+        gtk-cursor-theme-size=24
+        gtk-application-prefer-dark-theme=1
       '';
 
       tomlFormat = pkgs.formats.toml { };
@@ -118,7 +140,6 @@
             { type = "terminal"; key = key t.ui.secondary "e795" "Terminal"; }
             bar
             { type = "cpu"; key = key t.ui.tertiary "f2db" "CPU"; }
-            { type = "gpu"; key = key t.ui.tertiary "f108" "GPU"; }
             { type = "memory"; key = key t.ui.tertiary "f0e4" "Memory"; }
             { type = "disk"; key = key t.ui.tertiary "f0a0" "Disk"; }
             { type = "battery"; key = key t.ui.tertiary "f240" "Battery"; }
@@ -167,9 +188,12 @@
         fastfetch = fastfetchConf t;
         nvim = t.apps.nvim.colorscheme;
         gtk = t.apps.gtk.theme;
+        gtkIni = gtkIni t;
         vscodeTheme = t.apps.vscode.theme;
         vscodeExt = t.apps.vscode.extension;
         zedTheme = t.apps.zed.theme;
+        firefoxTheme = t.apps.firefox.id;
+        papirus = t.apps.papirus;
         accent = t.ui.accent;
         outline = t.ui.outline;
         backdrop = "${t.ui.bg}cc";
@@ -177,7 +201,7 @@
 
       themeSwitch = pkgs.writeShellApplication {
         name = "theme-switch";
-        runtimeInputs = with pkgs; [ jq gnused gnugrep coreutils dconf ];
+        runtimeInputs = with pkgs; [ jq gnused gnugrep coreutils dconf papirus-folders gtk3 ];
         text = ''
           MANIFEST=${lib.escapeShellArg manifest}
           STATE=${stateDir}
@@ -211,11 +235,12 @@
           get() { jq -r --arg k "$1" '.[$k]' <<<"$entry"; }
           name=$(get name)
 
-          # 1. State symlinks: foot (via include), starship, fastfetch, nvim
+          # 1. State symlinks: foot (via include), starship, fastfetch, GTK, nvim
           mkdir -p "$STATE"
           ln -sfn "$(get foot)" "$STATE/foot.ini"
           ln -sfn "$(get starship)" "$STATE/starship.toml"
           ln -sfn "$(get fastfetch)" "$STATE/fastfetch.jsonc"
+          ln -sfn "$(get gtkIni)" "$STATE/gtk.ini"
           get nvim > "$STATE/nvim"
           echo "$slug" > "$STATE/current"
 
@@ -244,12 +269,25 @@
             echo "theme-switch: warning: no '// theme:' markers in config.kdl" >&2
           fi
 
-          # 4. GTK (runtime; a rebuild re-asserts the default -> use reapply).
+          # 4. GTK. settings.ini was repointed in step 1 (GTK3 apps read it at
+          # launch); dconf covers live GTK4/libadwaita via the settings portal.
           # dconf write instead of gsettings: no schema lookup needed.
           dconf write /org/gnome/desktop/interface/gtk-theme "'$(get gtk)'" 2>/dev/null || \
             echo "theme-switch: warning: dconf write failed (no session bus?)" >&2
           if command -v xfconf-query >/dev/null; then
             xfconf-query -c xsettings -p /Net/ThemeName -s "$(get gtk)" 2>/dev/null || true
+          fi
+          # Folder icons: recolor the writable Papirus-Dark copy in
+          # ~/.local/share/icons (kept by theming.nix; papirus-folders finds
+          # it first because home dirs precede XDG_DATA_DIRS).
+          papirus-folders -C "$(get papirus)" --theme Papirus-Dark >/dev/null 2>&1 || \
+            echo "theme-switch: warning: papirus-folders failed (rebuild to create the copy)" >&2
+          gtk-update-icon-cache -q -f "$HOME/.local/share/icons/Papirus-Dark" 2>/dev/null || true
+
+          # Thunar lingers as a daemon; quit it so the next window rereads
+          # settings.ini and the icon theme (it restarts on demand).
+          if command -v thunar >/dev/null; then
+            thunar -q 2>/dev/null || true
           fi
 
           # 5. Noctalia: our generated colorschemes are installed as custom
@@ -264,9 +302,67 @@
             (code --install-extension "$ext" >/dev/null 2>&1 || true) &
           fi
 
+          # 7. Firefox: activate the palette's theme addon (all of them are
+          # policy-installed by modules/firefox.nix). user.js asserts the pref
+          # at every startup; when the profile is NOT in use (no "lock"
+          # symlink) the addon DB is flipped too, which is what actually
+          # decides the active theme deterministically. Next launch.
+          ffguid=$(get firefoxTheme)
+          ffbase="$HOME/.config/mozilla/firefox"
+          if [ -f "$ffbase/profiles.ini" ]; then
+            grep '^Path=' "$ffbase/profiles.ini" | cut -d= -f2- | while read -r prof; do
+              pdir="$ffbase/$prof"
+              [ -d "$pdir" ] || continue
+              uj="$pdir/user.js"
+              { grep -v 'extensions\.activeThemeID' "$uj" 2>/dev/null || true; } > "$uj.tmp"
+              echo "user_pref(\"extensions.activeThemeID\", \"$ffguid\");" >> "$uj.tmp"
+              mv "$uj.tmp" "$uj"
+              ext="$pdir/extensions.json"
+              if [ -f "$ext" ] && [ ! -L "$pdir/lock" ]; then
+                if jq --arg id "$ffguid" \
+                  '(.addons[] | select(.type=="theme"))
+                     |= (.userDisabled = (.id != $id) | .active = (.id == $id))' \
+                  "$ext" > "$ext.tmp" 2>/dev/null; then
+                  mv "$ext.tmp" "$ext"
+                else
+                  rm -f "$ext.tmp"
+                fi
+              elif [ -L "$pdir/lock" ]; then
+                echo "theme-switch: Firefox is running; restart it to apply the theme" >&2
+              fi
+            done
+          fi
+
+          # 8. Spotify: spicetify scheme names = palette slugs (spicetify.nix).
+          # NB: the subcommand is "refresh" — "update" self-updates the CLI.
+          if command -v spicetify >/dev/null; then
+            (spicetify config color_scheme "$slug" >/dev/null 2>&1 \
+              && spicetify refresh >/dev/null 2>&1) &
+          fi
+
+          # 9. Obsidian: per-vault accent color. Vault paths live in the
+          # global obsidian.json; each vault has its OWN appearance.json, so
+          # merge onto whatever's already there (cssTheme, font size, ...
+          # survive). Picked up on next launch, like Firefox/Spotify.
+          ojson="$HOME/.config/obsidian/obsidian.json"
+          if [ -f "$ojson" ]; then
+            jq -r '.vaults[]?.path // empty' "$ojson" | while read -r vault; do
+              [ -d "$vault/.obsidian" ] || continue
+              app="$vault/.obsidian/appearance.json"
+              [ -f "$app" ] || echo '{}' > "$app"
+              if jq --arg accent "$(get accent)" \
+                '.accentColor = $accent | .theme = "obsidian"' "$app" > "$app.tmp" 2>/dev/null; then
+                mv "$app.tmp" "$app"
+              else
+                rm -f "$app.tmp"
+              fi
+            done
+          fi
+
           echo "Theme: $name"
-          echo "  live now:      Noctalia, niri, GTK, VS Code, Zed"
-          echo "  next launch:   foot windows, fish/starship/fastfetch, nvim"
+          echo "  live now:      Noctalia, niri, VS Code, Zed, GTK4 apps"
+          echo "  next launch:   foot windows, fish/starship/fastfetch, nvim,"
+          echo "                 Thunar/GTK3, Firefox, Spotify, Obsidian"
         '';
       };
     in
@@ -280,6 +376,13 @@
             config.lib.file.mkOutOfStoreSymlink "${stateDir}/fastfetch.jsonc";
           "starship.toml".source =
             config.lib.file.mkOutOfStoreSymlink "${stateDir}/starship.toml";
+          # mkForce: the HM gtk module (theming.nix) writes these files with
+          # the default palette baked in; route them through the state dir
+          # instead so Thunar & co follow theme-switch on next launch.
+          "gtk-3.0/settings.ini".source = lib.mkForce
+            (config.lib.file.mkOutOfStoreSymlink "${stateDir}/gtk.ini");
+          "gtk-4.0/settings.ini".source = lib.mkForce
+            (config.lib.file.mkOutOfStoreSymlink "${stateDir}/gtk.ini");
         }
         # One Noctalia custom palette per theme
         // lib.mapAttrs' (slug: t: lib.nameValuePair
@@ -291,17 +394,24 @@
         ../../config/noctalia/plugins/theme-switcher;
 
       # First boot / fresh install: state symlinks must exist before the first
-      # foot/fastfetch launch. Seed the default palette without side effects.
+      # foot/fastfetch/GTK launch. Seed the default palette without side
+      # effects; each link is seeded individually so links added by newer
+      # revisions (e.g. gtk.ini) appear on existing installs too.
       home.activation.themeSwitcherSeed =
         lib.hm.dag.entryAfter [ "writeBoundary" ] ''
-          if [ ! -e "${stateDir}/current" ]; then
-            mkdir -p "${stateDir}"
+          mkdir -p "${stateDir}"
+          [ -e "${stateDir}/foot.ini" ] || \
             ln -sfn "${footConf themes.${palettes.default}}" "${stateDir}/foot.ini"
+          [ -e "${stateDir}/starship.toml" ] || \
             ln -sfn "${starshipConf themes.${palettes.default}}" "${stateDir}/starship.toml"
+          [ -e "${stateDir}/fastfetch.jsonc" ] || \
             ln -sfn "${fastfetchConf themes.${palettes.default}}" "${stateDir}/fastfetch.jsonc"
+          [ -e "${stateDir}/gtk.ini" ] || \
+            ln -sfn "${gtkIni themes.${palettes.default}}" "${stateDir}/gtk.ini"
+          [ -e "${stateDir}/nvim" ] || \
             echo "${themes.${palettes.default}.apps.nvim.colorscheme}" > "${stateDir}/nvim"
+          [ -e "${stateDir}/current" ] || \
             echo "${palettes.default}" > "${stateDir}/current"
-          fi
         '';
     };
 }

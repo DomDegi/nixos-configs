@@ -1,7 +1,7 @@
 {
     "security.workspace.trust.enabled": false,
     "security.workspace.trust.untrustedFiles": "open",
-    "workbench.colorTheme": "Everforest Dark",
+    "workbench.colorTheme": "Catppuccin Mocha",
     "catppuccin.accentColor": "lavender",
     "editor.inlineSuggest.edits.showCollapsed": true,
     "git.confirmSync": false,

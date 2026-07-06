@@ -50,10 +50,16 @@ theme-switch tokyo-night        # switch everything
 theme-switch reapply            # after a rebuild, restore a non-default theme
 ```
 
-Or click the palette icon in the bar → pick from the menu. What happens:
-Noctalia/niri/GTK/VS Code/Zed change **immediately**; foot windows, the
-fish/starship/fastfetch stack and nvim pick it up on **next launch**; the TTY
-console and the Ly greeter always show the **default** palette (rebuild-only).
+Or click the palette icon in the bar → pick from the menu; on success the
+same panel turns into a wallpaper roster for the theme you just picked (see
+below) instead of just closing. What happens to the rest of the system:
+Noctalia/niri/VS Code/Zed/GTK4 apps change **immediately**; foot windows, the
+fish/starship/fastfetch stack, nvim, **Thunar & other GTK3 apps** (their
+`settings.ini` is repointed and the Papirus **folder icons are recolored**;
+theme-switch quits the Thunar daemon so the next window rereads both),
+**Firefox**, **Spotify** (spicetify color scheme) and **Obsidian** (accent
+color, all open vaults) pick it up on **next launch**; the TTY console and
+the Ly greeter always show the **default** palette (rebuild-only).
 
 - **Add a theme**: one attrset in `modules/theme/_palettes.nix` (colors +
   nvim/VS Code/Zed/GTK bindings — see the header there), rebuild. It appears
@@ -67,6 +73,47 @@ console and the Ly greeter always show the **default** palette (rebuild-only).
 - nvim theme plugins download on first nvim start after a rebuild (lazy.nvim).
 - Don't delete the `// theme:accent|outline|backdrop` markers in
   `config/niri/config.kdl` — theme-switch rewrites exactly those lines.
+- Firefox: every palette's AMO theme addon is force-installed by policy
+  (`modules/firefox.nix`). theme-switch flips the active theme in the
+  profile's `extensions.json` (only possible while Firefox is **closed**) and
+  asserts `extensions.activeThemeID` in user.js. If Firefox was open during
+  the switch, restart it — and if the theme still didn't stick, close it and
+  run `theme-switch reapply`. A theme picked manually inside Firefox is
+  overwritten by the next theme-switch.
+- Folder icons: `papirus-folders -C <color>` runs against the writable
+  Papirus-Dark copy in `~/.local/share/icons` (created by a rebuild). Colors
+  per palette live in `_palettes.nix` (`apps.papirus`). That copy dereferences
+  the upstream theme's symlinks into the shared "Papirus" base for every size
+  papirus-folders actually touches (22/24/32/48/64) — some are whole size
+  dirs (32/48/64/96/128/84/8x8), some are just the `places` subdir inside an
+  otherwise-real size dir (22x22, 24x24); both break once copied out of the
+  store. The 22/24 case is what caused **Thunar's sidebar** specifically to
+  stay uncolored even after the main folder-view (48/64) worked — only
+  rebuilt when the icon theme package updates. If folders ever stop
+  recoloring again, check `~/.local/share/icons/Papirus-Dark/<size>/places/folder.svg`
+  actually resolves (`readlink -f`) instead of 404ing.
+- Spotify: spicetify patches a **writable copy** of Spotify under
+  `~/.local/share/spicetify-spotify` (see `modules/spicetify.nix`). The
+  `.nix-src` marker is only written when `backup apply` actually succeeds, so
+  a failed attempt retries on the next `nh os switch` — if Spotify is still
+  unthemed, run `spicetify backup apply` by hand and read the error (a stray
+  `custom_apps`/`extensions` entry referencing something not installed, e.g.
+  Marketplace, will fail the whole apply).
+- Obsidian: accent color only (no full CSS theme). Vault paths come from
+  `~/.config/obsidian/obsidian.json`; each vault's own
+  `.obsidian/appearance.json` gets `accentColor`/`theme` merged in, other keys
+  untouched. Applies on next launch per vault.
+
+## Wallpapers (per theme)
+
+Drop images (png/jpg/jpeg/webp) into `~/Pictures/Wallpapers/<slug>/` — one
+folder per palette, auto-created (slugs: `theme-switch list`). Two ways to
+pick one: click the image icon in the bar for the **active** theme's
+wallpapers any time, or switch themes from the theme-switcher panel — after a
+successful switch it turns into the same thumbnail roster for the theme you
+just picked, so you go straight from "pick a theme" to "pick its wallpaper"
+in one panel. Applied through Noctalia's own wallpaper engine and persists
+across reboots. CLI: `wallpaper-pick list`, `wallpaper-pick set <N>`.
 
 ## Secrets (sops-nix)
 

@@ -48,6 +48,7 @@
           # Application State
           ".config/mozilla"
           ".config/spotify"
+          ".config/spicetify" # theme-switch edits config-xpui.ini; Backup/ per Spotify version
           ".config/obsidian"
           ".config/Code"
           ".config/noctalia"
@@ -74,6 +75,10 @@
 
           # Desktop entries created at runtime (e.g. Claude Code URL handler)
           ".local/share/applications"
+
+          # Writable Spotify copy that spicetify patches (spicetify.nix);
+          # losing it just means a re-copy on next activation, but that's slow
+          ".local/share/spicetify-spotify"
 
           # Development / Terminal
           ".local/share/fish"

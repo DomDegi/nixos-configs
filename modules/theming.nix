@@ -3,11 +3,12 @@
 # rebuild asserts); theme-switch retargets GTK at runtime, and every
 # palette's GTK theme package is installed so switching always has its
 # target ("theme-switch reapply" restores a runtime choice after a rebuild).
+# Also keeps a writable Papirus-Dark copy in ~/.local/share/icons so
+# theme-switch can recolor the folder icons per palette (apps.papirus).
 {
   flake.modules.nixos.theming = { pkgs, lib, ... }:
     let
       palettes = import ./theme/_palettes.nix;
-      defaultGtk = palettes.themes.${palettes.default}.apps.gtk.theme;
       # GTK themes for the non-default palettes (plain package attrs);
       # the default (catppuccin) needs an override, added explicitly below.
       extraGtkPackages = lib.pipe palettes.themes [
@@ -30,8 +31,11 @@
         papirus-icon-theme
       ] ++ extraGtkPackages;
 
+      # NOTE: no GTK_THEME here — that env var overrides every other GTK
+      # theme mechanism per-session and would pin GTK3 apps (Thunar…) to the
+      # default palette, breaking theme-switch. Theme selection flows through
+      # ~/.config/gtk-{3,4}.0/settings.ini (switchable, see theme/switcher.nix).
       environment.sessionVariables = {
-        GTK_THEME = defaultGtk;
         XCURSOR_THEME = "catppuccin-mocha-dark-cursors";
         XCURSOR_SIZE = "24";
       };
@@ -46,12 +50,90 @@
       ];
     };
 
-  flake.modules.homeManager.theming = { pkgs, ... }:
+  flake.modules.homeManager.theming = { pkgs, lib, ... }:
     let
       palettes = import ./theme/_palettes.nix;
       defaultGtk = palettes.themes.${palettes.default}.apps.gtk.theme;
     in
     {
+      # Folder icons follow the palette (apps.papirus). papirus-folders
+      # rewrites folder-*.svg symlinks inside the theme, which is impossible
+      # on the read-only store copy — so keep a writable Papirus-Dark under
+      # ~/.local/share/icons (shadows the store one; persisted via
+      # .local/share/icons). Refreshed when the package updates, recolored
+      # for the active palette right away.
+      #
+      # Gotcha: in the upstream theme, most of Papirus-Dark's "places" dirs
+      # (where folder icons live) are RELATIVE symlinks into a sibling
+      # "../Papirus/<size>" theme, at TWO different levels: some whole size
+      # dirs are themselves symlinks (32/48/64/96/128/84/8x8), while others
+      # are real dirs with just "places" symlinked inside (22x22, 24x24).
+      # Plain `cp -r` preserves symlinks as-is, and once copied out of the
+      # store the sibling no longer exists at that relative path — so those
+      # icons 404 and GTK silently falls back to the un-recolored inherited
+      # theme. papirus-folders itself only touches 22/24/32/48/64, so this
+      # broke recoloring for the Thunar sidebar (22/24) even after the main
+      # folder-view sizes (48/64) were fixed. Fix: for every size, resolve
+      # where "places" really lives; if that's through the shared sibling,
+      # rebuild just that dir for real (writable, so papirus-folders can
+      # rewrite it) — dereferencing the whole size dir too when IT was the
+      # symlink, with every other category (apps/mimetypes/devices/...)
+      # symlinked absolute back into the read-only store. Keeps the copy
+      # ~100 MB instead of ~1.5 GB from fully dereferencing the shared theme.
+      home.activation.papirusCopy = lib.hm.dag.entryAfter [ "writeBoundary" ] ''
+        (
+          src=${pkgs.papirus-icon-theme}
+          dest="$HOME/.local/share/icons/Papirus-Dark"
+          if [ "$(cat "$dest/.nix-src" 2>/dev/null)" != "$src" ]; then
+            echo "theming: refreshing writable Papirus-Dark copy"
+            rm -rf "$dest"
+            mkdir -p "$dest"
+            cp -r "$src/share/icons/Papirus-Dark/." "$dest/"
+            chmod -R u+w "$dest"
+
+            base="$src/share/icons/Papirus"
+            srcDark="$src/share/icons/Papirus-Dark"
+            for sizedir in "$srcDark"/*/; do
+              size=$(basename "$sizedir")
+              placesSrc="$srcDark/$size/places"
+              [ -e "$placesSrc" ] || continue
+              resolved=$(readlink -f "$placesSrc")
+              case "$resolved" in
+                "$base"/*)
+                  # Whole size dir is a symlink to the shared theme: rebuild
+                  # it for real, symlinking every non-"places" category
+                  # absolute into the store.
+                  if [ -L "$dest/$size" ]; then
+                    realSize=$(readlink -f "$srcDark/$size")
+                    rm -f "$dest/$size"
+                    mkdir -p "$dest/$size"
+                    for cat in "$realSize"/*/; do
+                      catname=$(basename "$cat")
+                      [ "$catname" = "places" ] && continue
+                      ln -s "$cat" "$dest/$size/$catname"
+                    done
+                  fi
+                  rm -rf "$dest/$size/places"
+                  cp -r "$resolved" "$dest/$size/places"
+                  chmod -R u+w "$dest/$size/places"
+                  ;;
+              esac
+            done
+
+            slug=$(cat "$HOME/.local/state/theme/current" 2>/dev/null \
+              || echo ${palettes.default})
+            case "$slug" in
+        ${lib.concatStringsSep "\n" (lib.mapAttrsToList
+          (slug: t: "      ${slug}) color=${t.apps.papirus} ;;") palettes.themes)}
+              *) color=${palettes.themes.${palettes.default}.apps.papirus} ;;
+            esac
+            ${pkgs.papirus-folders}/bin/papirus-folders -C "$color" \
+              --theme Papirus-Dark >/dev/null 2>&1 || true
+            ${pkgs.gtk3}/bin/gtk-update-icon-cache -q -f "$dest" 2>/dev/null || true
+            printf '%s' "$src" > "$dest/.nix-src"
+          fi
+        ) || echo "theming: Papirus copy failed, folder colors stay default" >&2
+      '';
       home.pointerCursor = {
         name = "catppuccin-mocha-dark-cursors";
         package = pkgs.catppuccin-cursors.mochaDark;

@@ -42,7 +42,7 @@ hardware-configuration.nix   # generated; kept OUT of modules/ on purpose
 secrets/secrets.yaml         # encrypted secrets (safe to publish)
 config/                      # raw configs, symlinked out-of-store (see below)
   niri/config.kdl  nvim/init.lua  vscode/settings.json  zed/settings.json
-  noctalia/plugins/{battery-conserve,display-mode,airpods-audio,theme-switcher}/
+  noctalia/plugins/{battery-conserve,display-mode,airpods-audio,theme-switcher,wallpaper-picker}/
 modules/                     # one feature per file — auto-imported
   hosts/nixos.nix  home-manager.nix  persistence.nix  ephemeral-root.nix
   theme/_palettes.nix  theme/switcher.nix  # all colors + theme-switch tooling
@@ -50,7 +50,7 @@ modules/                     # one feature per file — auto-imported
   nvidia.nix  audio.nix  bluetooth-airpods.nix  battery-conserve.nix
   display-mode.nix  niri.nix  greeter.nix  theming.nix  terminal.nix
   dev.nix  nvim.nix  documents.nix  desktop-apps.nix  thunar.nix
-  firefox.nix  vscode.nix  zed.nix  noctalia.nix
+  firefox.nix  vscode.nix  zed.nix  noctalia.nix  spicetify.nix  wallpaper.nix
 ```
 
 **📚 Full documentation:** [docs/modules.md](docs/modules.md) — curated

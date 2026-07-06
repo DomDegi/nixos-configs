@@ -12,11 +12,13 @@ tags         = ["Bar"]
 id    = "widget"
 entry = "widget.luau"
 
-# The theme menu opened by the bar widget.
+# The theme menu opened by the bar widget. After a successful switch it
+# transitions in place to a wallpaper roster for the newly active theme
+# (sized to fit that thumbnail grid too).
 [[panel]]
 id        = "panel"
 entry     = "panel.luau"
-width     = 320
-height    = 420
+width     = 360
+height    = 480
 placement = "floating"
 position  = "center"

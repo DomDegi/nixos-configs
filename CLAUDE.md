@@ -1,42 +1,128 @@
+# CLAUDE.md
+
+This file provides guidance to Claude Code (claude.ai/code) when working with code in this repository.
+
+---
+
 # nixos-configs — working rules
 
-Single-host NixOS flake using the **dendritic pattern**: flake-parts +
-import-tree; every `.nix` under `modules/` is auto-imported and is one
-feature contributing `flake.modules.nixos.<name>` and/or
-`flake.modules.homeManager.<name>`. Docs: `README.md` (overview),
-`docs/modules.md` (per-module reference), `docs/operations.md` (recipes).
+Single-host NixOS flake for a Lenovo Legion 5 using the **dendritic pattern**: flake-parts + import-tree; every `.nix` under `modules/` is auto-imported and is one feature contributing `flake.modules.nixos.<name>` and/or `flake.modules.homeManager.<name>`. Ephemeral BTRFS root (Impermanence), Niri compositor, Noctalia shell.
+
+**Docs:** `README.md` (overview), `docs/modules.md` (per-module reference), `docs/operations.md` (recipes, secrets, disaster recovery), `docs/reference.md` (generated module docstrings).
+
+## Build & verify workflow
+
+```bash
+nix flake check                      # eval sanity before rebuild
+nh os switch                         # build + nvd diff + activate (preferred)
+nh os test                           # build + activate WITHOUT adding GRUB entry (experiment safely)
+nix flake update && nh os switch     # upgrade everything
+nh clean all --keep 5                # prune old generations
+nix store diff-closures /run/current-system ./result  # verify closure matches (should ≈ empty)
+```
+
+**After rebuild:** check for `hm-bak` renames in activation output (means a real file blocked home-manager). **Before reboot:** after password changes, verify `/run/secrets-for-users/<name>` and `getent shadow` match.
+
+## Dendritic pattern at a glance
+
+```
+modules/
+├── hosts/nixos.nix          # Assembles the system from ALL flake.modules.nixos.*
+├── home-manager.nix         # Pipes ALL flake.modules.homeManager.* into user domdegi
+├── persistence.nix          # Ephemeral root allowlist (paths that survive reboot)
+├── theme/
+│   ├── _palettes.nix        # 7 color palettes (Catppuccin, Tokyo Night, Gruvbox, etc.)
+│   └── switcher.nix         # Runtime theme switching + bar widget
+├── boot.nix, nvidia.nix, audio.nix, niri.nix, ...  # One feature per file
+└── _scratch.nix             # (disabled; _ prefix = not imported)
+```
+
+Every `.nix` file contributes both `flake.modules.nixos.*` (system) and `flake.modules.homeManager.*` (user) halves. Adding a feature is just creating a file; removing it is deleting or prefixing with `_`.
 
 ## Keep the docs in sync (hard rule)
 
-Any commit that adds/removes/renames a module or meaningfully changes what a
-module does MUST, in the same commit: update `docs/modules.md`, keep the
-module's header comment accurate (it is the docstring), and regenerate
-`docs/reference.md` via `nix run .#docs > docs/reference.md`. New workflows,
-gotchas or recovery procedures go to `docs/operations.md`. `README.md` stays
-a short overview — update its module tree only when files are added/removed.
+Any commit that adds/removes/renames a module or meaningfully changes what a module does MUST, in the same commit:
+- Update `docs/modules.md` (one entry per module)
+- Keep the module's header comment accurate (it is the docstring)
+- Regenerate `docs/reference.md` via `nix run .#docs > docs/reference.md`
+- New workflows, gotchas, or recovery procedures go to `docs/operations.md`
+- `README.md` stays a short overview — only update its module tree when files are added/removed
 
-## Repo-specific gotchas
+## What takes effect immediately vs what needs rebuild
 
-- `modules/` is auto-imported: never leave scratch `.nix` files there
-  (prefix `_` to disable). `hardware-configuration.nix` must stay at repo
-  root, OUT of `modules/`.
-- `plugins.enabled` (Noctalia) has a single owner: `modules/noctalia.nix`.
-  Noctalia's runtime config is `~/.local/state/noctalia/settings.toml`
-  (persisted); `programs.noctalia.settings` is only a first-run seed.
-- Colors have a single source: `modules/theme/_palettes.nix` (consumed by
-  theme/switcher.nix, theming, terminal, locale, greeter). Never hardcode a
-  hex color in a module; the `// theme:` markers in `config/niri/config.kdl`
-  are load-bearing (theme-switch seds those lines).
-- `mkOutOfStoreSymlink` takes absolute string literals only
-  (`"/persist/nixos-configs/..."`), never `./paths` (silent store-freeze).
-- Persisting an already-existing **file** needs it moved under `/persist`
-  first, or activation fails ("A file already exists").
-- Refactors must be verified with
-  `nix store diff-closures /run/current-system ./result` ≈ empty.
-- sudo is interactive-only for the user: hand them ONE short command or a
-  script file to run; never multi-line sudo blocks (fish mangles them).
-- Password/secrets: sops-nix, age key at `/persist/var/lib/sops-nix/key.txt`
-  (never in repo). After password changes verify `/run/secrets-for-users/`
-  and `getent shadow` BEFORE any reboot.
-- Never push `old-history`, `backup/pre-dendritic` or
-  `archive-persistent-home` (pre-public history with inline password hash).
+**Immediate (edit + save, no rebuild):**
+- `config/niri/config.kdl` (HM symlink → live reload)
+- `config/nvim/init.lua`, VS Code settings, Zed settings (pick up on next app launch)
+- Noctalia widgets and bar config via the GUI (reads `~/.local/state/noctalia/settings.toml`)
+- Theme switching via `theme-switch` command or bar menu (rewrites symlinks & config)
+
+**Requires rebuild + reboot to take effect:**
+- Boot config, kernel, or hardware changes
+- System package additions (environment.systemPackages)
+- User creation/group changes
+- Secrets changes (sops-nix)
+
+**Requires rebuild but applies immediately:**
+- Home-manager packages (home.packages) — symlinked after rebuild
+- Most config files managed by HM (fish/starship/foot/etc.) — activate after rebuild
+- Theme-related system settings (GTK, cursor, console) — pick up after rebuild + `theme-switch reapply`
+
+**After a rebuild that touches theme-related code:** run `theme-switch reapply` to restore a non-default palette; the default is always re-asserted by declarative configs.
+
+## System stability — high-risk areas
+
+**🔴 CRITICAL — Can break the system or prevent boot:**
+
+- **File persistence activation failure:** When adding an already-existing **file** to persistence (modules/persistence.nix), **move it to `/persist` first** mirroring the path (e.g., `sudo mv /etc/foo /persist/etc/foo`), or activation will fail with "A file already exists at ...". Directories are OK; files are not.
+- **Symlink path assumptions:** `mkOutOfStoreSymlink` takes absolute string literals only (`"/persist/nixos-configs/..."`), never `./paths` — silent store-freeze otherwise. Hybrid config files (niri/config.kdl, nvim/init.lua, VS Code settings) hardcode this path.
+- **Store closure bloat:** After refactors, verify with `nix store diff-closures /run/current-system ./result` — should be ≈ empty. Unintended deps = needless system size.
+- **Secrets & sops-nix:** age key lives at `/persist/var/lib/sops-nix/key.txt` (never in git, mode 600). After password changes, verify `/run/secrets-for-users/` and `getent shadow` match BEFORE reboot, or you'll lock yourself out.
+- **hardware-configuration.nix:** auto-generated by nixos-install, stays at repo root (OUT of modules/). Never edit it manually — regenerate via `nixos-generate-config` if hardware changes.
+
+**🟡 IMPORTANT — Breaking changes:**
+
+- **Noctalia's `plugins.enabled`:** Owned exclusively by `modules/noctalia.nix` — never enable/disable plugins elsewhere. The `~/.local/state/noctalia/settings.toml` (persisted) is the runtime truth; `programs.noctalia.settings` is only a first-run seed.
+- **Colors — single source:** `modules/theme/_palettes.nix` is the only place colors are defined. Never hardcode a hex value elsewhere. The `// theme:` markers in `config/niri/config.kdl` are load-bearing (theme-switch rewrites only those lines).
+- **`modules/` auto-import:** Never leave scratch `.nix` files there — prefix with `_` to disable. Only files meant to be features should exist.
+- **sudo commands:** Interactive-only for the user. Always hand one short command or a script file to run; never paste multi-line sudo blocks (fish mangles them).
+- **Never push:** `old-history`, `backup/pre-dendritic`, `archive-persistent-home` (pre-public history with inline password hash).
+
+## Common workflows
+
+**Add a feature (new module):**
+1. Create `modules/myfeature.nix` with both halves:
+   ```nix
+   {
+     flake.modules.nixos.myfeature = { pkgs, ... }: { /* system part */ };
+     flake.modules.homeManager.myfeature = { pkgs, ... }: { /* user part */ };
+   }
+   ```
+2. Test: `nix flake check` → `nh os test` (experiment without GRUB entry)
+3. Update `docs/modules.md` with one entry + add header comment to module
+4. Rebuild: `nix flake check && nh os switch`
+5. Generate docs: `nix run .#docs > docs/reference.md`
+6. Commit all in one CL with updated docs
+
+**Persist an app's state** (survive ephemeral-root reboot):
+1. Add path to `modules/persistence.nix` (`users.domdegi.directories` or `.files`)
+2. If it's a **file** that already exists, move it first: `sudo mv /home/domdegi/.config/app /persist/home/domdegi/.config/app` (mirror the path)
+3. Rebuild + verify: `nh os switch` and reboot to confirm it persists
+
+**Add a Noctalia bar widget:**
+1. Create `config/noctalia/plugins/<name>/plugin.toml` + `widget.luau`
+2. Link it in the feature module via `xdg.dataFile`
+3. Add `domdegi/<name>` to `plugins.enabled` in `modules/noctalia.nix` (single owner — never set this list elsewhere)
+4. Rebuild, then add widget to bar via Noctalia GUI (or edit `~/.local/state/noctalia/settings.toml` directly)
+
+**Add a new color theme:**
+1. Add one attrset to `modules/theme/_palettes.nix` (ANSI-16 colors + nvim colorscheme name + VS Code/Zed/GTK theme mappings — see header)
+2. Rebuild: `nh os switch` → `theme-switch list` → `theme-switch <name>`
+3. VS Code extension auto-installs on first switch (needs network); Zed auto-installs; nvim plugins download on next nvim launch
+
+**Disaster recovery:**
+- **Bad rebuild / broken boot:** Pick previous generation in GRUB menu
+- **Locked out of login:** Boot previous generation; or GRUB edit → append `init=/bin/sh` to kernel line
+- **Lost a file:** Check `/old_roots/<timestamp>/` on btrfs root (wiped snapshots kept 30 days)
+- **Full reinstall:** minimal NixOS → clone repo to `/persist/nixos-configs` → restore age key → `nh os switch`
+  
+See `docs/operations.md` for full recipes.

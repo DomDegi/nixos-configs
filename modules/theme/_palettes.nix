@@ -16,6 +16,14 @@
 #   apps.vscode    workbench.colorTheme + marketplace extension id
 #   apps.zed       theme name + zed extension id ("" = built-in)
 #   apps.gtk       GTK theme dir name + nixpkgs package attr ("" = none)
+#   apps.firefox   AMO static theme: id (the addon GUID, becomes
+#                  extensions.activeThemeID) + slug (addons.mozilla.org URL
+#                  slug, used by the policy install_url)
+#   apps.papirus   papirus-folders color for the folder icons (valid names:
+#                  papirus-folders -l; e.g. violet blue orange nordic green)
+#
+# Spotify (spicetify) needs no per-theme field: modules/spicetify.nix
+# generates one color scheme per palette straight from ui/ansi.
 rec {
   default = "catppuccin-lavender";
 
@@ -42,6 +50,8 @@ rec {
         vscode = { theme = "Catppuccin Mocha"; extension = "Catppuccin.catppuccin-vsc"; };
         zed = { theme = "Catppuccin Mocha"; extension = "catppuccin"; };
         gtk = { theme = "catppuccin-mocha-lavender-standard"; package = "catppuccin-gtk"; };
+        firefox = { id = "{8446b178-c865-4f5c-8ccc-1d7887811ae3}"; slug = "catppuccin-mocha-lavender-git"; };
+        papirus = "blue";
       };
     };
 
@@ -67,6 +77,8 @@ rec {
         vscode = { theme = "Tokyo Night"; extension = "enkia.tokyo-night"; };
         zed = { theme = "Tokyo Night"; extension = "tokyo-night"; };
         gtk = { theme = "Tokyonight-Dark"; package = "tokyonight-gtk-theme"; };
+        firefox = { id = "{cebd391d-f568-473f-bb6e-698d08ec81ec}"; slug = "tokyo-night-dark-theme"; };
+        papirus = "blue";
       };
     };
 
@@ -92,6 +104,8 @@ rec {
         vscode = { theme = "Gruvbox Dark Medium"; extension = "jdinhlife.gruvbox"; };
         zed = { theme = "Gruvbox Dark"; extension = "gruvbox"; };
         gtk = { theme = "Gruvbox-Dark"; package = "gruvbox-gtk-theme"; };
+        firefox = { id = "{eb8c4a94-e603-49ef-8e81-73d3c4cc04ff}"; slug = "gruvbox-dark-theme"; };
+        papirus = "orange";
       };
     };
 
@@ -117,6 +131,8 @@ rec {
         vscode = { theme = "Nord"; extension = "arcticicestudio.nord-visual-studio-code"; };
         zed = { theme = "Nord"; extension = "nord"; };
         gtk = { theme = "Nordic"; package = "nordic"; };
+        firefox = { id = "{758478b6-29f3-4d69-ab17-c49fe568ed80}"; slug = "nord-polar-night-theme"; };
+        papirus = "nordic";
       };
     };
 
@@ -142,6 +158,8 @@ rec {
         vscode = { theme = "Rosé Pine"; extension = "mvllow.rose-pine"; };
         zed = { theme = "Rosé Pine"; extension = "rose-pine"; };
         gtk = { theme = "rose-pine"; package = "rose-pine-gtk-theme"; };
+        firefox = { id = "{84496095-b7ad-496e-bce3-51cca2e43703}"; slug = "rose-pine-dark-theme"; };
+        papirus = "magenta";
       };
     };
 
@@ -167,6 +185,8 @@ rec {
         vscode = { theme = "Dracula Theme"; extension = "dracula-theme.theme-dracula"; };
         zed = { theme = "Dracula"; extension = "dracula"; };
         gtk = { theme = "Dracula"; package = "dracula-theme"; };
+        firefox = { id = "{b743f56d-1cc1-4048-8ba6-f9c2ab7aa54d}"; slug = "dracula-dark-colorscheme"; };
+        papirus = "violet";
       };
     };
 
@@ -192,6 +212,8 @@ rec {
         vscode = { theme = "Everforest Dark"; extension = "sainnhe.everforest"; };
         zed = { theme = "Everforest Dark"; extension = "everforest"; };
         gtk = { theme = "Everforest-Dark"; package = "everforest-gtk-theme"; };
+        firefox = { id = "{0e5c8ff0-b54b-4bd1-b33e-d5e016e066f0}"; slug = "everforest-dark-medium-theme"; };
+        papirus = "green";
       };
     };
   };

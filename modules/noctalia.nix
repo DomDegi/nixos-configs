@@ -33,6 +33,7 @@
           "domdegi/display-mode"
           "domdegi/airpods-audio"
           "domdegi/theme-switcher"
+          "domdegi/wallpaper-picker"
         ];
       };
     };
