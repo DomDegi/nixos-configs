@@ -10,7 +10,11 @@
 -- function NAME (host convention), so a fixed pool of onPickN maps
 -- thumbnail index -> wallpaper.
 
-local WALLPAPER_DIR = os.getenv("HOME") .. "/Pictures/Wallpapers"
+-- os.getenv isn't exposed in Noctalia's Luau sandbox (calling it throws
+-- "attempt to call a nil value" and kills the whole chunk before anything
+-- renders) — hardcode the path, same convention as the absolute paths
+-- baked into the nix modules (mkOutOfStoreSymlink etc).
+local WALLPAPER_DIR = "/home/domdegi/Pictures/Wallpapers"
 local COLS = 2
 local THUMB_W = 152
 local THUMB_H = 96
