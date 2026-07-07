@@ -13,6 +13,11 @@
       directories = [
         "/var/log"
         "/var/lib/bluetooth"
+        # systemd-rfkill's saved soft-block state per device. Without this,
+        # every reboot loses the "unblocked" state and the hci0 USB
+        # controller comes back up rfkill soft-blocked (this hardware's
+        # default), leaving Bluetooth powered off until manually unblocked.
+        "/var/lib/systemd/rfkill"
         "/var/lib/nixos"
         "/var/lib/systemd/coredump"
         "/var/lib/docker" # Docker images/volumes otherwise vanish on reboot
