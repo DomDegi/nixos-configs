@@ -14,7 +14,7 @@ Every `.nix` file under `modules/` is auto-imported by import-tree and is one
 |---|---|
 | `hosts/nixos.nix` | Assembles `nixosConfigurations.nixos` from **all** `flake.modules.nixos.*` + `hardware-configuration.nix`; sets `hostName` and `stateVersion`. |
 | `home-manager.nix` | HM↔NixOS wiring: pipes **all** `flake.modules.homeManager.*` into user `domdegi`; `useGlobalPkgs`, `backupFileExtension = "hm-bak"`, `home.stateVersion`. |
-| `nix.nix` | `allowUnfree`, weekly GC, store auto-optimise, flakes enabled, autoUpgrade (off), **nh** (`nh os switch`, flake path preset) + `nvd`. |
+| `nix.nix` | `allowUnfree`, weekly GC, store auto-optimise, flakes enabled, autoUpgrade (off), **nh** (`nh os switch`, flake path preset) + `nvd`. Also carries an overlay patching known-broken upstream packages: catppuccin-gtk (python3.13 pin), gruvbox/tokyonight-gtk-theme (strip invalid `border-spacing` CSS causing GTK3 parse warnings). |
 | `secrets.nix` | sops-nix: `secrets/secrets.yaml` decrypted with age key at `/persist/var/lib/sops-nix/key.txt`; `domdegi-password-hash` has `neededForUsers` and feeds `hashedPasswordFile`. |
 | `users.nix` | User `domdegi` (groups, fish shell, description), `mutableUsers = false`, system-level fish enable, `~/nixos-configs → /persist/nixos-configs` symlink. |
 

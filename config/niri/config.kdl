@@ -9,16 +9,12 @@
 input {
     keyboard {
         xkb {
-            // You can set rules, model, layout, variant and options.
-            // For more information, see xkeyboard-config(7).
-
-            // For example:
-            // layout "it"
-            // options "grp:win_space_toggle,compose:ralt,ctrl:nocaps"
-
-            // If this section is empty, niri will fetch xkb settings
-            // from org.freedesktop.locale1. You can control these using
-            // localectl set-x11-keymap.
+            // Set explicitly rather than relying on org.freedesktop.locale1:
+            // that D-Bus service reports an empty X11 layout on this system
+            // even though /etc/X11/xorg.conf.d/00-keyboard.conf (from
+            // modules/locale.nix) is correct, so niri was silently falling
+            // back to US English.
+            layout "it"
         }
 
         // Enable numlock on startup, omitting this setting disables it.
@@ -198,13 +194,13 @@ layout {
 
         // Color of the ring on the active monitor.
         // (the trailing "// theme:" tags are markers for theme-switch — keep them)
-        active-color "#a7c080" // theme:accent
+        active-color "#b4befe" // theme:accent
 
         // Color of the ring on inactive monitors.
         //
         // The focus ring only draws around the active window, so the only place
         // where you can see its inactive-color is on other monitors.
-        inactive-color "#475258" // theme:outline
+        inactive-color "#585b70" // theme:outline
 
         // You can also use gradients. They take precedence over solid colors.
         // Gradients are rendered the same as CSS linear-gradient(angle, from, to).
@@ -295,7 +291,7 @@ layout {
 
 overview {
     // Fills the background of the overview with a translucent theme Base color
-    backdrop-color "#2d353bcc" // theme:backdrop
+    backdrop-color "#1e1e2ecc" // theme:backdrop
 }
 
 // Add lines like this to spawn processes at startup.
