@@ -21,9 +21,6 @@
 #                  slug, used by the policy install_url)
 #   apps.papirus   papirus-folders color for the folder icons (valid names:
 #                  papirus-folders -l; e.g. violet blue orange nordic green)
-#
-# Spotify (spicetify) needs no per-theme field: modules/spicetify.nix
-# generates one color scheme per palette straight from ui/ansi.
 rec {
   default = "catppuccin-lavender";
 

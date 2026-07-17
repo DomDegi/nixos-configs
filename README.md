@@ -50,7 +50,7 @@ modules/                     # one feature per file — auto-imported
   nvidia.nix  audio.nix  bluetooth-airpods.nix  battery-conserve.nix
   display-mode.nix  niri.nix  greeter.nix  theming.nix  terminal.nix
   dev.nix  nvim.nix  documents.nix  desktop-apps.nix  thunar.nix
-  firefox.nix  vscode.nix  zed.nix  noctalia.nix  spicetify.nix  wallpaper.nix
+  firefox.nix  vscode.nix  zed.nix  noctalia.nix  wallpaper.nix
 ```
 
 **📚 Full documentation:** [docs/modules.md](docs/modules.md) — curated

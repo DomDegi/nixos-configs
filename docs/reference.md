@@ -1,4 +1,3 @@
-warning: Git tree '/persist/nixos-configs' is dirty
 # Module reference (generated)
 
 > Do not edit by hand. Regenerate from the module header comments:
@@ -176,35 +175,6 @@ at activation with the age key at /persist/var/lib/sops-nix/key.txt.
 /persist is neededForBoot, so the key is available early enough for
 neededForUsers secrets.
 
-## `spicetify.nix`
-
-*Contributes to: homeManager*
-
-Spicetify: Spotify skinned with the active palette, following theme-switch.
-
-NixOS twist: spicetify patches files inside Spotify's install dir, which is
-a read-only store path here. So activation keeps a WRITABLE COPY of
-${pkgs.spotify}/share/spotify under ~/.local/share/spicetify-spotify
-(refreshed whenever the store path changes, i.e. on Spotify updates) plus a
-launcher built by rewriting the original wrapper to exec the copy. A hiPrio
-`spotify` shim and a desktop entry make the patched copy what actually runs.
-
-Theming: one local spicetify theme ("domdegi") whose color.ini has ONE
-SCHEME PER PALETTE, generated from theme/_palettes.nix — no third-party
-theme repos. `theme-switch` runs `spicetify config color_scheme <slug> &&
-spicetify refresh`; Spotify shows it on next launch.
-State persisted: ~/.config/spicetify + ~/.local/share/spicetify-spotify
-(see persistence.nix).
-
-Gotcha: "backup apply" is one-time per copy (unpacks Apps/*.spa in place;
-a second run fails with nothing pristine left to back up from), so the
-.nix-src marker is only written when it actually SUCCEEDS — writing it
-unconditionally would permanently skip retrying a failed, never-patched
-copy. Also strips custom_apps/extensions before applying: a
-freshly-created config-xpui.ini ships with custom_apps=marketplace by
-default, and without that custom app actually installed, that fails the
-whole apply.
-
 ## `terminal.nix`
 
 *Contributes to: homeManager nixos*
@@ -240,9 +210,6 @@ Field contract (all colors "#rrggbb"):
   apps.papirus   papirus-folders color for the folder icons (valid names:
                  papirus-folders -l; e.g. violet blue orange nordic green)
 
-Spotify (spicetify) needs no per-theme field: modules/spicetify.nix
-generates one color scheme per palette straight from ui/ansi.
-
 ## `theme/switcher.nix`
 
 *Contributes to: homeManager*
@@ -255,7 +222,7 @@ config (prompt-matched ╭─ frame layout), a GTK settings.ini and a Noctalia
 colorscheme. The `theme-switch` script repoints symlinks under
 ~/.local/state/theme (persisted), updates VS Code/Zed/niri/GTK/Noctalia in
 place, activates the palette's Firefox theme addon (user.js + extensions.json),
-flips the spicetify color scheme, recolors the Papirus folder icons
+recolors the Papirus folder icons
 (papirus-folders on the writable copy from theming.nix) and Obsidian's
 accent color per vault. Driven from the Noctalia bar via
 domdegi/theme-switcher; on a successful pick, its panel transitions in
@@ -266,8 +233,7 @@ for picking a wallpaper without switching themes).
 Reach per app:
   instant ......... noctalia, niri (live reload), VS Code, Zed, GTK4/libadwaita
   next launch ..... foot windows, starship/fastfetch (new shells), nvim,
-                    Thunar & other GTK3 apps, Firefox, Spotify (spicetify),
-                    Obsidian
+                    Thunar & other GTK3 apps, Firefox, Obsidian
   rebuild-only .... TTY console + Ly greeter (always the default palette)
 
 ## `theming.nix`

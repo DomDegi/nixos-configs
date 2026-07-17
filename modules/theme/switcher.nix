@@ -6,7 +6,7 @@
 # colorscheme. The `theme-switch` script repoints symlinks under
 # ~/.local/state/theme (persisted), updates VS Code/Zed/niri/GTK/Noctalia in
 # place, activates the palette's Firefox theme addon (user.js + extensions.json),
-# flips the spicetify color scheme, recolors the Papirus folder icons
+# recolors the Papirus folder icons
 # (papirus-folders on the writable copy from theming.nix) and Obsidian's
 # accent color per vault. Driven from the Noctalia bar via
 # domdegi/theme-switcher; on a successful pick, its panel transitions in
@@ -17,8 +17,7 @@
 # Reach per app:
 #   instant ......... noctalia, niri (live reload), VS Code, Zed, GTK4/libadwaita
 #   next launch ..... foot windows, starship/fastfetch (new shells), nvim,
-#                     Thunar & other GTK3 apps, Firefox, Spotify (spicetify),
-#                     Obsidian
+#                     Thunar & other GTK3 apps, Firefox, Obsidian
 #   rebuild-only .... TTY console + Ly greeter (always the default palette)
 {
   flake.modules.homeManager.theme-switcher = { pkgs, lib, config, ... }:
@@ -333,17 +332,10 @@
             done
           fi
 
-          # 8. Spotify: spicetify scheme names = palette slugs (spicetify.nix).
-          # NB: the subcommand is "refresh" — "update" self-updates the CLI.
-          if command -v spicetify >/dev/null; then
-            (spicetify config color_scheme "$slug" >/dev/null 2>&1 \
-              && spicetify refresh >/dev/null 2>&1) &
-          fi
-
-          # 9. Obsidian: per-vault accent color. Vault paths live in the
+          # 8. Obsidian: per-vault accent color. Vault paths live in the
           # global obsidian.json; each vault has its OWN appearance.json, so
           # merge onto whatever's already there (cssTheme, font size, ...
-          # survive). Picked up on next launch, like Firefox/Spotify.
+          # survive). Picked up on next launch, like Firefox.
           ojson="$HOME/.config/obsidian/obsidian.json"
           if [ -f "$ojson" ]; then
             jq -r '.vaults[]?.path // empty' "$ojson" | while read -r vault; do
@@ -362,7 +354,7 @@
           echo "Theme: $name"
           echo "  live now:      Noctalia, niri, VS Code, Zed, GTK4 apps"
           echo "  next launch:   foot windows, fish/starship/fastfetch, nvim,"
-          echo "                 Thunar/GTK3, Firefox, Spotify, Obsidian"
+          echo "                 Thunar/GTK3, Firefox, Obsidian"
         '';
       };
     in
