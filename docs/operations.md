@@ -16,6 +16,19 @@ nh clean all --keep 5        # prune old generations (keep last 5)
 After a rebuild that changes HM-managed files, check activation output for
 `hm-bak` renames — that means a real file was in the way of a managed one.
 
+- **A change to `niri.nix` (or anything else that makes `systemd.user.services.niri`
+  restart) will kill your graphical session mid-activation if you run the
+  switch from inside a niri terminal.** `nh os switch`/`nixos-rebuild switch`
+  activates live changes (including restarting changed services) *before*
+  registering the new GRUB entry; if that restart takes down the compositor
+  you're running the command from, the switch dies with it — no new
+  generation, no new boot entry, and you land back on the old one after a
+  reboot (`readlink -f /nix/var/nix/profiles/system` will still show the old
+  store path; check `/boot/loader/entries/` or `grub.cfg` for the actual
+  generation list if something "didn't take" after a switch). Fix: switch to
+  a TTY first (`Ctrl+Alt+F2`), log in, run the switch from there, then
+  reboot back into the graphical session.
+
 - **Updating noctalia deliberately**: `noctalia.url` in `flake.nix` is
   pinned to a specific rev, not the default branch — it has no tagged
   releases and has broken our 5 custom bar widgets before by changing the
