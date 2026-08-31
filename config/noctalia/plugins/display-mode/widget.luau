@@ -1,6 +1,6 @@
 -- External monitor extend <-> mirror toggle.
 -- Mirroring runs wl-mirror fullscreen on the external output, since niri
--- has no native output mirroring (see display-mode script in modules/home.nix).
+-- has no native output mirroring (see display-mode script in modules/display-mode.nix).
 
 local STATUS_CMD = "display-mode status"
 local TOGGLE_CMD = "display-mode toggle"

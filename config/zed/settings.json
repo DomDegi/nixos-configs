@@ -1,13 +1,12 @@
 {
-    "theme": "Everforest Dark",
+    "agent_servers": {
+        "claude-acp": {
+            "type": "registry"
+        }
+    },
+    "theme": "Ayu Dark",
     "buffer_font_family": "JetBrainsMono Nerd Font",
     "auto_install_extensions": {
-        "catppuccin": true,
-        "tokyo-night": true,
-        "gruvbox": true,
-        "nord": true,
-        "rose-pine": true,
-        "dracula": true,
-        "everforest": true
+        "catppuccin": true
     }
 }

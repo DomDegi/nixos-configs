@@ -1,9 +1,10 @@
 -- Lenovo IdeaPad battery conservation mode widget.
--- Reads the sysfs flag directly (world-readable, see modules/system.nix);
--- toggling goes through the NOPASSWD sudo rule for battery-conserve.
+-- Reads the sysfs flag directly (world-readable) and toggles it by writing
+-- through battery-conserve (group-writable to battery_ctl, no sudo needed;
+-- see modules/battery-conserve.nix).
 
 local MODE_PATH = "/sys/bus/platform/drivers/ideapad_acpi/VPC2004:00/conservation_mode"
-local TOGGLE_CMD = "sudo /run/current-system/sw/bin/battery-conserve toggle"
+local TOGGLE_CMD = "battery-conserve toggle"
 
 noctalia.setUpdateInterval(3000)
 

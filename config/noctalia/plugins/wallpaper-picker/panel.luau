@@ -1,14 +1,13 @@
--- Wallpaper menu panel: shows THUMBNAILS of the active theme's images (via
+-- Wallpaper menu panel: shows THUMBNAILS of ~/Pictures/Wallpapers (via
 -- `wallpaper-pick list`) and applies one on click (`wallpaper-pick set <N>`,
 -- which drives Noctalia's native wallpaper engine). The panel stays open so
 -- several wallpapers can be tried in a row.
 --
--- ui.image (see noctalia's ui_tree_reconciler) takes an absolute/`~` path
--- directly and supports onClick itself, so each thumbnail IS the button —
--- no ui.button/text list needed. Laid out as a 2-column grid since the ui.*
--- flex containers have no wrap; onOpenClicked callbacks dispatch by global
--- function NAME (host convention), so a fixed pool of onPickN maps
--- thumbnail index -> wallpaper.
+-- ui.image takes an absolute/`~` path directly and supports onClick itself,
+-- so each thumbnail IS the button — no ui.button/text list needed. Laid out
+-- as a 2-column grid since the ui.* flex containers have no wrap;
+-- onOpenClicked callbacks dispatch by global function NAME (host
+-- convention), so a fixed pool of onPickN maps thumbnail index -> wallpaper.
 
 -- os.getenv isn't exposed in Noctalia's Luau sandbox (calling it throws
 -- "attempt to call a nil value" and kills the whole chunk before anything
@@ -20,7 +19,6 @@ local THUMB_W = 152
 local THUMB_H = 96
 
 local wallpapers = {} -- basenames, sorted (same order as wallpaper-pick)
-local slug = ""
 local current = "" -- basename of the wallpaper in use
 local applying = false
 
@@ -28,8 +26,7 @@ local render
 
 local function refresh()
   noctalia.runAsync("wallpaper-pick status", function(st)
-    local s, _, cur = string.match(st.stdout or "", "^([^\t]+)\t(%d+)\t([^\n]*)")
-    slug = s or ""
+    local _, cur = string.match(st.stdout or "", "^(%d+)\t([^\n]*)")
     current = cur or ""
     noctalia.runAsync("wallpaper-pick list", function(result)
       wallpapers = {}
@@ -45,7 +42,7 @@ local function thumb(i, w)
   local isCurrent = w == current
   return ui.column({ key = w, gap = 4 }, {
     ui.image({
-      path = `{WALLPAPER_DIR}/{slug}/{w}`,
+      path = `{WALLPAPER_DIR}/{w}`,
       width = THUMB_W,
       height = THUMB_H,
       fit = "cover",
@@ -75,21 +72,20 @@ render = function()
   end
   if #grid == 0 then
     grid = { ui.label({
-      text = if slug == "" then "Loading…"
-             else `No wallpapers yet.\nDrop images in\n~/Pictures/Wallpapers/{slug}/`,
+      text = "No wallpapers yet.\nDrop images in\n~/Pictures/Wallpapers/",
       color = "on_surface_variant",
     }) }
   end
 
   panel.render(ui.column({ flexGrow = 1, gap = 16 }, {
     ui.row({ align = "center", justify = "space_between", gap = 8 }, {
-      ui.label({ text = if slug == "" then "Wallpaper" else `Wallpaper · {slug}`,
+      ui.label({ text = "Wallpaper",
                  fontSize = 16, fontWeight = "bold", color = "on_surface", flexGrow = 1 }),
-      ui.button({ glyph = "close", onClick = "onCloseClicked" }),
+      ui.button({ glyph = "x", onClick = "onCloseClicked" }),
     }),
     ui.scroll({ flexGrow = 1, gap = 8, align = "stretch" }, grid),
     ui.label({
-      text = "Per-theme folders under ~/Pictures/Wallpapers/.",
+      text = "~/Pictures/Wallpapers/",
       fontSize = 11,
       color = "on_surface_variant",
     }),

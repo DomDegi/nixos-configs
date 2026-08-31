@@ -1,6 +1,11 @@
 # Lenovo IdeaPad battery conservation mode (charge cap at ~60%):
-# sysfs permission rule, toggle script + sudo rule, and the Noctalia
-# bar widget. The whole feature in one file.
+# sysfs permission rule, toggle script + the Noctalia bar widget. The whole
+# feature in one file.
+#
+# No sudo: the sysfs flag is made group-writable to `battery_ctl` (domdegi is
+# a member), so the toggle script writes it directly as the user. Simpler
+# and avoids sudo's tty/PATH quirks when invoked from Noctalia's Luau
+# runtime (which shells out via `/bin/sh -c`, no interactive tty).
 {
   flake.modules.nixos.battery-conserve = { pkgs, ... }: {
     services.upower.enable = true;
@@ -21,7 +26,6 @@
       (pkgs.writeShellScriptBin "battery-conserve" ''
         MODE_PATH="/sys/bus/platform/drivers/ideapad_acpi/VPC2004:00/conservation_mode"
 
-        # --- UI STATUS CHECK (No Sudo Required) ---
         if [ "$1" == "status" ]; then
           CURRENT=$(cat "$MODE_PATH")
           if [ "$CURRENT" -eq 1 ]; then
@@ -30,12 +34,6 @@
             echo "󰁹 100%" # Full battery icon
           fi
           exit 0
-        fi
-
-        # --- TOGGLE/WRITE COMMANDS (Sudo Required) ---
-        if [ "$EUID" -ne 0 ]; then
-          echo "Please run as root: sudo battery-conserve [on|off|toggle|status]"
-          exit 1
         fi
 
         if [ "$1" == "on" ]; then
@@ -52,21 +50,9 @@
             echo 1 > "$MODE_PATH"
           fi
         else
-          echo "Usage: sudo battery-conserve [on|off|toggle|status]"
+          echo "Usage: battery-conserve [on|off|toggle|status]"
         fi
       '')
-    ];
-
-    security.sudo.extraRules = [
-      {
-        users = [ "domdegi" ];
-        commands = [
-          {
-            command = "/run/current-system/sw/bin/battery-conserve";
-            options = [ "NOPASSWD" ];
-          }
-        ];
-      }
     ];
   };
 

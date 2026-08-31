@@ -12,6 +12,7 @@
       jq
       gcc
       claude-code
+      gemini-cli
     ];
 
     programs.git = {

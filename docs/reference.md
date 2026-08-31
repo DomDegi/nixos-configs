@@ -15,8 +15,13 @@ bluetooth-airpods.nix.
 *Contributes to: homeManager nixos*
 
 Lenovo IdeaPad battery conservation mode (charge cap at ~60%):
-sysfs permission rule, toggle script + sudo rule, and the Noctalia
-bar widget. The whole feature in one file.
+sysfs permission rule, toggle script + the Noctalia bar widget. The whole
+feature in one file.
+
+No sudo: the sysfs flag is made group-writable to `battery_ctl` (domdegi is
+a member), so the toggle script writes it directly as the user. Simpler
+and avoids sudo's tty/PATH quirks when invoked from Noctalia's Luau
+runtime (which shells out via `/bin/sh -c`, no interactive tty).
 
 ## `bluetooth-airpods.nix`
 
@@ -81,9 +86,6 @@ listed in persistence.nix.
 
 Firefox: enabled system-wide; profile state lives in the persisted
 ~/.config/mozilla (declarative HM profiles would fight it for little gain).
-Every palette's AMO theme addon (apps.firefox in theme/_palettes.nix) is
-force-installed via enterprise policies, so theme-switch only has to point
-extensions.activeThemeID at one of them (user.js, read on next launch).
 
 ## `greeter.nix`
 
@@ -109,7 +111,9 @@ declared under flake.modules.nixos.* (one per feature file).
 
 *Contributes to: nixos*
 
-Time zone, locales, console keymap and TTY theming.
+Time zone, locales, console keymap and TTY colors (static Catppuccin
+Lavender — the console can't follow a runtime theme, so this is just
+literal hex, no palette indirection).
 
 ## `network.nix`
 
@@ -156,7 +160,8 @@ Hybrid AMD + Nvidia graphics (PRIME offload; dGPU powers down when idle).
 
 *Contributes to: homeManager*
 
-Neovim + language servers + treesitter. init.lua stays a raw lua file.
+Neovim: LazyVim starter (config/nvim/) + language servers, installed by
+Nix so LazyVim's LSP config never needs mason to hit the network.
 
 ## `persistence.nix`
 
@@ -180,73 +185,17 @@ neededForUsers secrets.
 *Contributes to: homeManager nixos*
 
 Terminal life: foot, fish, starship, fastfetch, zoxide and the modern
-CLI replacements, plus baseline system CLI tools.
-
-## `theme/_palettes.nix`
-
-*Contributes to: flake-parts*
-
-Theme palettes — the single source of truth for every color in this config.
-Underscore prefix: NOT auto-imported; consumers do
-  palettes = import ./theme/_palettes.nix;   (adjust the relative path)
-
-Adding a theme = adding one attrset here. Everything else (foot/starship/
-fastfetch configs, the Noctalia colorscheme, the theme-switch script and its
-bar menu) is generated from it by modules/theme/switcher.nix.
-
-Field contract (all colors "#rrggbb"):
-  name       display name; also the Noctalia colorscheme folder name
-  dark       true for dark themes (drives Noctalia darkMode pairing)
-  ui         role colors: bg bgDim surface outline fg fgDim
-             accent secondary tertiary error
-  ansi       the 16 terminal colors (black..white, bright*)
-  apps.nvim      lazy.nvim plugin repo + :colorscheme name
-  apps.vscode    workbench.colorTheme + marketplace extension id
-  apps.zed       theme name + zed extension id ("" = built-in)
-  apps.gtk       GTK theme dir name + nixpkgs package attr ("" = none)
-  apps.firefox   AMO static theme: id (the addon GUID, becomes
-                 extensions.activeThemeID) + slug (addons.mozilla.org URL
-                 slug, used by the policy install_url)
-  apps.papirus   papirus-folders color for the folder icons (valid names:
-                 papirus-folders -l; e.g. violet blue orange nordic green)
-
-## `theme/switcher.nix`
-
-*Contributes to: homeManager*
-
-Runtime theme switching across the whole rice, generated from
-_palettes.nix (the single source of truth for colors).
-
-For every palette this builds: foot colors, a starship config, a fastfetch
-config (prompt-matched ╭─ frame layout), a GTK settings.ini and a Noctalia
-colorscheme. The `theme-switch` script repoints symlinks under
-~/.local/state/theme (persisted), updates VS Code/Zed/niri/GTK/Noctalia in
-place, activates the palette's Firefox theme addon (user.js + extensions.json),
-recolors the Papirus folder icons
-(papirus-folders on the writable copy from theming.nix) and Obsidian's
-accent color per vault. Driven from the Noctalia bar via
-domdegi/theme-switcher; on a successful pick, its panel transitions in
-place to a thumbnail roster of the new theme's wallpapers (same grid as
-the standalone domdegi/wallpaper-picker, which still exists on its own
-for picking a wallpaper without switching themes).
-
-Reach per app:
-  instant ......... noctalia, niri (live reload), VS Code, Zed, GTK4/libadwaita
-  next launch ..... foot windows, starship/fastfetch (new shells), nvim,
-                    Thunar & other GTK3 apps, Firefox, Obsidian
-  rebuild-only .... TTY console + Ly greeter (always the default palette)
+CLI replacements, plus baseline system CLI tools. Colors are static
+Catppuccin Mocha Lavender — no runtime theme switching.
 
 ## `theming.nix`
 
 *Contributes to: homeManager nixos*
 
-GTK, cursors, icons, fonts, dconf/xfconf, session variables — themed from
-modules/theme/_palettes.nix. The DEFAULT palette is baked in here (what a
-rebuild asserts); theme-switch retargets GTK at runtime, and every
-palette's GTK theme package is installed so switching always has its
-target ("theme-switch reapply" restores a runtime choice after a rebuild).
-Also keeps a writable Papirus-Dark copy in ~/.local/share/icons so
-theme-switch can recolor the folder icons per palette (apps.papirus).
+GTK, cursors, icons, fonts, dconf/xfconf, session variables — a single
+static Catppuccin Mocha Lavender look. No runtime switching, no
+multi-palette GTK theme installs: this is baseline app appearance, not
+theming infrastructure.
 
 ## `thunar.nix`
 
@@ -271,13 +220,11 @@ symlink): GUI edits land in the git working tree as reviewable diffs.
 
 *Contributes to: homeManager*
 
-Per-theme wallpapers: ~/Pictures/Wallpapers/<palette-slug>/ holds each
-theme's collection (dirs auto-created from _palettes.nix; Pictures is
-already persisted). The domdegi/wallpaper-picker Noctalia widget lists the
-ACTIVE theme's images and applies one via Noctalia's native wallpaper
-engine; theme-switch pops the picker open after a switch when the new
-theme's folder is non-empty. The `wallpaper-pick` helper does the shell
-work (list/set by index) so the Luau side never handles file paths.
+Wallpapers: drop images into ~/Pictures/Wallpapers (Pictures is already
+persisted). The domdegi/wallpaper-picker Noctalia widget lists them and
+applies one via Noctalia's native wallpaper engine. The `wallpaper-pick`
+helper does the shell work (list/set by index) so the Luau side never
+handles file paths.
 
 ## `zed.nix`
 

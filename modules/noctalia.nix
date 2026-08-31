@@ -8,6 +8,17 @@
 # So `settings` here must stay minimal: theme + the plugin enable list
 # (which MUST live only in this file — freeform TOML lists don't merge
 # reliably across modules).
+#
+# Theme source is "wallpaper": Noctalia's own Material-You-style extractor
+# (m3-content scheme) generates the palette from the active wallpaper, no
+# static/hardcoded palette anywhere. This also drives Noctalia's *builtin
+# template* pipeline (src/theme/builtin_templates.cpp upstream) — enabling
+# the "foot" template makes Noctalia write
+# ~/.config/foot/themes/noctalia from the SAME generated colors on every
+# theme/wallpaper change; modules/terminal.nix includes that file so foot
+# tracks it. Every other app just stays whatever it already was (no
+# per-app template wired up) — deliberately not turning this into a new
+# full-system theme-switcher.
 { inputs, ... }:
 
 {
@@ -23,8 +34,12 @@
       settings = {
         theme = {
           mode = "dark";
-          source = "builtin";
-          builtin = "Catppuccin";
+          source = "wallpaper";
+          wallpaper_scheme = "m3-content";
+          templates = {
+            enable_builtin_templates = true;
+            builtin_ids = [ "foot" ];
+          };
         };
         # Local plugins (linked into ~/.local/share/noctalia/plugins by
         # their feature files) must also be enabled by id.
@@ -32,7 +47,6 @@
           "domdegi/battery-conserve"
           "domdegi/display-mode"
           "domdegi/airpods-audio"
-          "domdegi/theme-switcher"
           "domdegi/wallpaper-picker"
         ];
       };

@@ -1,23 +1,17 @@
 # Ly TTY login screen + keyring unlock on login.
 {
-  flake.modules.nixos.greeter = { lib, ... }:
-    let
-      palettes = import ./theme/_palettes.nix;
-      t = palettes.themes.${palettes.default};
-      ly = c: "0x00${lib.removePrefix "#" c}";
-    in
-    {
+  flake.modules.nixos.greeter = {
     services.displayManager.ly = {
       enable = true;
       settings = {
         # Disable animations for a clean, minimal look
         animation = "none";
 
-        # Box colors from the DEFAULT palette (runs before login —
-        # can't follow runtime theme switches)
-        bg = ly t.ui.bg;
-        fg = ly t.ui.fg;
-        border_fg = ly t.ui.accent;
+        # Box colors: static Catppuccin Mocha Lavender (runs before login,
+        # so it can't follow any runtime theme anyway).
+        bg = "0x001e1e2e";
+        fg = "0x00cdd6f4";
+        border_fg = "0x00b4befe";
         hide_borders = false;
         blank_box = true;
         clock = "%c";

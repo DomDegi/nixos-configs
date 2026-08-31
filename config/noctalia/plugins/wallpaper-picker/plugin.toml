@@ -1,19 +1,18 @@
-id           = "domdegi/wallpaper-picker"
-name         = "Wallpaper Picker"
-version      = "1.0.0"
-min_noctalia = "5.0.0"
-author       = "domdegi"
-license      = "MIT"
-icon         = "image"
-description  = "Pick a wallpaper from the active theme's folder (~/Pictures/Wallpapers/<theme>, via wallpaper-pick)."
-tags         = ["Bar"]
+id          = "domdegi/wallpaper-picker"
+name        = "Wallpaper Picker"
+version     = "1.0.0"
+plugin_api  = 3
+author      = "domdegi"
+license     = "MIT"
+icon        = "photo"
+description = "Pick a wallpaper from ~/Pictures/Wallpapers, via wallpaper-pick."
+tags        = ["Bar"]
 
 [[widget]]
 id    = "widget"
 entry = "widget.luau"
 
-# The wallpaper menu opened by the bar widget (and by theme-switch after a
-# theme change, when the new theme's folder has images).
+# The wallpaper menu opened by the bar widget.
 [[panel]]
 id        = "panel"
 entry     = "panel.luau"

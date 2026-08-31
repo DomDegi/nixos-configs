@@ -9,12 +9,26 @@ Day-2 recipes for this config. Commands assume you're in
 nh os switch                 # build + nvd package diff + activate (preferred)
 nh os test                   # activate WITHOUT adding a GRUB entry (experiment safely)
 nix flake check              # eval sanity before a rebuild
-nix flake update && nh os switch    # upgrade everything (kernel, apps, noctalia)
+nix flake update && nh os switch    # upgrade everything EXCEPT noctalia (pinned, see below)
 nh clean all --keep 5        # prune old generations (keep last 5)
 ```
 
 After a rebuild that changes HM-managed files, check activation output for
 `hm-bak` renames — that means a real file was in the way of a managed one.
+
+- **Updating noctalia deliberately**: `noctalia.url` in `flake.nix` is
+  pinned to a specific rev, not the default branch — it has no tagged
+  releases and has broken our 5 custom bar widgets before by changing the
+  plugin manifest/IPC surface. To bump it: `nix flake lock --update-input
+  noctalia`, `nh os switch`, then verify each widget in
+  `config/noctalia/plugins/` still shows up on the bar (a manifest missing
+  the mandatory `plugin_api` key, or a plugin dropped somewhere other than
+  `~/.local/share/noctalia/plugins/<name>/`, fails silently — no bar icon,
+  no error).
+- Prefer updating one input at a time
+  (`nix flake lock --update-input nixpkgs`, etc.) over a blanket `nix flake
+  update` when chasing down what broke after an upgrade — it tells you which
+  input to blame.
 
 ## Add something
 
@@ -41,61 +55,24 @@ After a rebuild that changes HM-managed files, check activation output for
   module, add `domdegi/<name>` to `plugins.enabled` in `modules/noctalia.nix`
   (single owner — never set that list elsewhere), then add the widget to the
   bar via Noctalia's GUI (or `~/.local/state/noctalia/settings.toml`).
+  `plugin.toml` MUST include `id`, `name` and a numeric `plugin_api` (not
+  `min_noctalia` — that key doesn't exist and is silently ignored; a missing
+  `plugin_api` fails the whole manifest, with no error surfaced anywhere
+  except the widget just never appearing). Glyph names in `icon =`/`setGlyph`
+  must be real Tabler icon names — check against
+  `share/noctalia/assets/fonts/tabler.json` in the noctalia package if a
+  glyph doesn't render.
 
-## Theme switching
+## Theming
 
-```bash
-theme-switch list                # available palettes (● = active)
-theme-switch tokyo-night        # switch everything
-theme-switch reapply            # after a rebuild, restore a non-default theme
-```
+One static look (Catppuccin Mocha Lavender), inlined directly into
+`theming.nix`, `terminal.nix`, `locale.nix`, `greeter.nix`,
+`config/niri/config.kdl`, `config/vscode/settings.json` and
+`config/zed/settings.json` — no runtime switcher, no `theme/_palettes.nix`
+indirection. To change the look, edit those files' hardcoded values directly
+and rebuild; there's no single source of truth to update anymore, since
+there's only one theme.
 
-Or click the palette icon in the bar → pick from the menu; on success the
-same panel turns into a wallpaper roster for the theme you just picked (see
-below) instead of just closing. What happens to the rest of the system:
-Noctalia/niri/VS Code/Zed/GTK4 apps change **immediately**; foot windows, the
-fish/starship/fastfetch stack, nvim, **Thunar & other GTK3 apps** (their
-`settings.ini` is repointed and the Papirus **folder icons are recolored**;
-theme-switch quits the Thunar daemon so the next window rereads both),
-**Firefox** and **Obsidian** (accent
-color, all open vaults) pick it up on **next launch**; the TTY console and
-the Ly greeter always show the **default** palette (rebuild-only).
-
-- **Add a theme**: one attrset in `modules/theme/_palettes.nix` (colors +
-  nvim/VS Code/Zed/GTK bindings — see the header there), rebuild. It appears
-  in `theme-switch list` and the bar menu automatically. If it has a GTK
-  theme, its package is installed automatically too.
-- **A rebuild resets GTK/niri-defaults to the default palette** (declarative
-  files re-assert it). Run `theme-switch reapply` if you were on another theme.
-- VS Code needs the theme's extension; theme-switch auto-installs it in the
-  background on first switch (needs network). Zed auto-installs via
-  `auto_install_extensions` in its settings.
-- nvim theme plugins download on first nvim start after a rebuild (lazy.nvim).
-- Don't delete the `// theme:accent|outline|backdrop` markers in
-  `config/niri/config.kdl` — theme-switch rewrites exactly those lines.
-- Firefox: every palette's AMO theme addon is force-installed by policy
-  (`modules/firefox.nix`). theme-switch flips the active theme in the
-  profile's `extensions.json` (only possible while Firefox is **closed**) and
-  asserts `extensions.activeThemeID` in user.js. If Firefox was open during
-  the switch, restart it — and if the theme still didn't stick, close it and
-  run `theme-switch reapply`. A theme picked manually inside Firefox is
-  overwritten by the next theme-switch.
-- Folder icons: `papirus-folders -C <color>` runs against the writable
-  Papirus-Dark copy in `~/.local/share/icons` (created by a rebuild). Colors
-  per palette live in `_palettes.nix` (`apps.papirus`). That copy dereferences
-  the upstream theme's symlinks into the shared "Papirus" base for every size
-  papirus-folders actually touches (22/24/32/48/64) — some are whole size
-  dirs (32/48/64/96/128/84/8x8), some are just the `places` subdir inside an
-  otherwise-real size dir (22x22, 24x24); both break once copied out of the
-  store. The 22/24 case is what caused **Thunar's sidebar** specifically to
-  stay uncolored even after the main folder-view (48/64) worked — only
-  rebuilt when the icon theme package updates. If folders ever stop
-  recoloring again, check `~/.local/share/icons/Papirus-Dark/<size>/places/folder.svg`
-  actually resolves (`readlink -f`) instead of 404ing.
-- Obsidian: accent color only (no full CSS theme). Vault paths come from
-  `~/.config/obsidian/obsidian.json`; each vault's own
-  `.obsidian/appearance.json` gets `accentColor`/`theme` merged in, other keys
-  untouched. Applies on next launch per vault.
 - **Spotify is intentionally plain (unthemed)**: `modules/spicetify.nix` was
   removed after spicetify's patched `xpui` assets left Spotify stuck on the
   loading spinner / rendering a blank grey window (audio + MPRIS still worked
@@ -105,16 +82,12 @@ the Ly greeter always show the **default** palette (rebuild-only).
   re-adding spicetify in the future, verify the patched UI actually paints
   content (not just that the process launches) before trusting it.
 
-## Wallpapers (per theme)
+## Wallpapers
 
-Drop images (png/jpg/jpeg/webp) into `~/Pictures/Wallpapers/<slug>/` — one
-folder per palette, auto-created (slugs: `theme-switch list`). Two ways to
-pick one: click the image icon in the bar for the **active** theme's
-wallpapers any time, or switch themes from the theme-switcher panel — after a
-successful switch it turns into the same thumbnail roster for the theme you
-just picked, so you go straight from "pick a theme" to "pick its wallpaper"
-in one panel. Applied through Noctalia's own wallpaper engine and persists
-across reboots. CLI: `wallpaper-pick list`, `wallpaper-pick set <N>`.
+Drop images (png/jpg/jpeg/webp) into `~/Pictures/Wallpapers/` (flat, auto-created).
+Click the image icon in the bar to open the picker panel, or use the CLI:
+`wallpaper-pick list`, `wallpaper-pick set <N>`. Applied through Noctalia's
+own wallpaper engine and persists across reboots.
 
 ## Secrets (sops-nix)
 

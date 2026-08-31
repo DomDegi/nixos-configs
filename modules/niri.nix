@@ -26,8 +26,16 @@
       ACTION=="add", SUBSYSTEM=="backlight", KERNEL=="nvidia_wmi_ec_backlight", MODE="0666", RUN+="${pkgs.coreutils}/bin/chmod a+w /sys/class/backlight/%k/brightness"
     '';
 
-    # Fix niri's stripped PATH so it can find brightnessctl
-    systemd.user.services.niri.enableDefaultPath = false;
+    # Deliberately NOT setting systemd.user.services.niri.enableDefaultPath:
+    # doing so makes NixOS construct an explicit Environment=PATH= for the
+    # unit, which REPLACES (not appends to) the full PATH niri.service
+    # otherwise correctly inherits from the systemd --user manager's own
+    # environment (which already has the home-manager profile + system
+    # profile). A prior "fix" here forced it to `true`, which shrank niri's
+    # PATH down to just coreutils/findutils/gnugrep/gnused/systemd —
+    # breaking every `spawn`/`spawn-sh` keybind for anything not in that
+    # tiny set (foot, display-mode, noctalia, firefox, thunar, sh itself).
+    # Leave this option alone; the default is correct.
   };
 
   flake.modules.homeManager.niri = { config, pkgs, ... }: {

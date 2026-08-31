@@ -1,4 +1,4 @@
--- AirPods Pro profile switcher (script lives in modules/home.nix).
+-- AirPods Pro profile switcher (script lives in modules/bluetooth-airpods.nix).
 -- Music = A2DP (best quality, no microphone).
 -- Call  = HFP  (microphone works, lower quality) — for Webex/Meet calls.
 -- It also makes the AirPods the default sink/source and fixes the volumes.

@@ -1,12 +1,8 @@
-# Time zone, locales, console keymap and TTY theming.
+# Time zone, locales, console keymap and TTY colors (static Catppuccin
+# Lavender — the console can't follow a runtime theme, so this is just
+# literal hex, no palette indirection).
 {
-  flake.modules.nixos.locale = { lib, ... }:
-    let
-      palettes = import ./theme/_palettes.nix;
-      t = palettes.themes.${palettes.default};
-      raw = c: lib.removePrefix "#" c;
-    in
-    {
+  flake.modules.nixos.locale = {
     time.timeZone = "Europe/Rome";
     i18n.defaultLocale = "en_US.UTF-8";
 
@@ -22,27 +18,26 @@
       LC_TIME = "it_IT.UTF-8";
     };
 
-    # Italian keyboard map + TTY colors from the DEFAULT palette
-    # (modules/theme/_palettes.nix — the console can't switch at runtime)
+    # Italian keyboard map + TTY colors (Catppuccin Mocha Lavender)
     console = {
       keyMap = "it";
-      colors = map raw [
-        t.ui.bg # 0: background
-        t.ansi.red
-        t.ansi.green
-        t.ansi.yellow
-        t.ansi.blue
-        t.ansi.magenta
-        t.ansi.cyan
-        t.ui.fg # 7: foreground
-        t.ansi.brightBlack
-        t.ansi.brightRed
-        t.ansi.brightGreen
-        t.ansi.brightYellow
-        t.ansi.brightBlue
-        t.ansi.brightMagenta
-        t.ansi.brightCyan
-        t.ansi.brightWhite
+      colors = [
+        "1e1e2e" # 0: background
+        "f38ba8"
+        "a6e3a1"
+        "f9e2af"
+        "89b4fa"
+        "f5c2e7"
+        "94e2d5"
+        "cdd6f4" # 7: foreground
+        "585b70"
+        "f38ba8"
+        "a6e3a1"
+        "f9e2af"
+        "89b4fa"
+        "f5c2e7"
+        "94e2d5"
+        "a6adc8"
       ];
     };
 

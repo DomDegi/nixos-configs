@@ -1,11 +1,9 @@
 # ❄️ NixOS · Niri · Noctalia — Dendritic Configuration
 
 Personal NixOS flake for a Lenovo Legion 5 (hybrid AMD/Nvidia), built around the
-**Niri** scrollable tiling compositor, the **Noctalia v5** shell, and a
-**runtime-switchable theme system** — Catppuccin Lavender by default; Tokyo
-Night, Gruvbox, Nord, Rosé Pine, Dracula and Everforest one bar-click away
-(`theme-switch`) — on an **ephemeral BTRFS root** that is wiped on every boot
-(Impermanence).
+**Niri** scrollable tiling compositor, the **Noctalia v5** shell, and a single
+static **Catppuccin Mocha Lavender** look, on an **ephemeral BTRFS root** that
+is wiped on every boot (Impermanence).
 
 - **Compositor:** [Niri](https://github.com/YaLTeR/niri) · **Bar/Shell:** [Noctalia v5](https://github.com/noctalia-dev/noctalia) with custom Luau widgets
 - **Login:** Ly (TTY, Catppuccin) · **Terminal:** Foot · **Prompt:** Fish + Starship
@@ -41,11 +39,10 @@ hardware-configuration.nix   # generated; kept OUT of modules/ on purpose
 .sops.yaml                   # sops recipient config (age public key)
 secrets/secrets.yaml         # encrypted secrets (safe to publish)
 config/                      # raw configs, symlinked out-of-store (see below)
-  niri/config.kdl  nvim/init.lua  vscode/settings.json  zed/settings.json
-  noctalia/plugins/{battery-conserve,display-mode,airpods-audio,theme-switcher,wallpaper-picker}/
+  niri/config.kdl  nvim/ (LazyVim)  vscode/settings.json  zed/settings.json
+  noctalia/plugins/{battery-conserve,display-mode,airpods-audio,wallpaper-picker}/
 modules/                     # one feature per file — auto-imported
   hosts/nixos.nix  home-manager.nix  persistence.nix  ephemeral-root.nix
-  theme/_palettes.nix  theme/switcher.nix  # all colors + theme-switch tooling
   secrets.nix  users.nix  boot.nix  nix.nix  locale.nix  network.nix
   nvidia.nix  audio.nix  bluetooth-airpods.nix  battery-conserve.nix
   display-mode.nix  niri.nix  greeter.nix  theming.nix  terminal.nix
@@ -62,10 +59,10 @@ module change (enforced by `CLAUDE.md`).
 
 ## 🔗 Hybrid configs (editable *and* tracked)
 
-GUI-edited files (`config/niri/config.kdl`, `nvim/init.lua`, VS Code & Zed
-`settings.json`) are linked with `mkOutOfStoreSymlink`: the app writes straight
-into this repo's working tree, so edits apply instantly (no rebuild) and show
-up in `git status` for review.
+GUI-edited files (`config/niri/config.kdl`, the whole `nvim/` LazyVim tree,
+VS Code & Zed `settings.json`) are linked with `mkOutOfStoreSymlink`: the app
+writes straight into this repo's working tree, so edits apply instantly (no
+rebuild) and show up in `git status` for review.
 
 > ⚠️ **Path assumption:** those symlinks hardcode `/persist/nixos-configs`.
 > Clone the repo exactly there (a `~/nixos-configs` symlink is created by
@@ -104,9 +101,8 @@ sudo install -D -m 600 <backup-of-key.txt> /persist/var/lib/sops-nix/key.txt
 ```bash
 nh os switch                                          # apply (shows package diff)
 nix flake check                                       # eval sanity
-nix flake update && nh os switch                      # upgrade everything
+nix flake update && nh os switch                      # upgrade everything except noctalia (pinned)
 sudo nixos-rebuild switch --flake .#nixos             # plain fallback
-theme-switch list && theme-switch tokyo-night         # switch the whole rice
 ```
 
 More recipes in [docs/operations.md](docs/operations.md).
@@ -114,5 +110,4 @@ More recipes in [docs/operations.md](docs/operations.md).
 Custom scripts wired to Noctalia bar widgets: `battery-conserve` (Lenovo 60%
 charge cap), `display-mode` (extend ↔ mirror via wl-mirror, also on Mod+P),
 `airpods-audio` (A2DP music ↔ HFP call profile with mic fixes),
-`theme-switch` (palette menu — the whole desktop follows
-`modules/theme/_palettes.nix`).
+`wallpaper-pick` (picker panel for `~/Pictures/Wallpapers/`).
