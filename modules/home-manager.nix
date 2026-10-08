@@ -21,7 +21,11 @@
         # modules/noctalia.nix) — same option, two declarations. Keep
         # using the noctalia project's own module (more current, matches
         # our plugin/systemd options) and disable home-manager's copy.
-        disabledModules = [ "programs/noctalia.nix" ];
+        disabledModules = [
+          "programs/noctalia.nix"
+          "programs/noctalia"
+          "<home-manager/modules/programs/noctalia.nix>"
+        ];
         imports = builtins.attrValues (config.flake.modules.homeManager or { });
         home.stateVersion = "25.11";
       };
