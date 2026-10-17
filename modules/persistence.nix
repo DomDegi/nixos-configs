@@ -82,6 +82,12 @@
           ".local/share/nvim" # Optional: Keeps you from re-downloading plugins on boot
           ".local/share/zoxide"
 
+          # R/Julia (packages come from each project's devshell; these hold
+          # the Julia depot and RStudio settings/recent projects)
+          ".julia"
+          ".config/rstudio"
+          ".local/share/rstudio"
+
           # Theming
           ".icons"
           ".local/share/icons"

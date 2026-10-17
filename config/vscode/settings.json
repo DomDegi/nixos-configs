@@ -6,15 +6,13 @@
     "git.confirmSync": false,
     "notebook.lineNumbers": "on",
     "git.autofetch": true,
-    "roo-cline.apiProvider": "ollama",
-    "roo-cline.ollamaModelId": "qwen2.5-coder:7b",
-    "roo-cline.ollamaBaseUrl": "http://127.0.0.1:11434",
-    "roo-cline.vsCodeLmModelSelector": {},
-    "roo-cline.debug": false,
-    "roo-cline.allowedCommands": [
-        "git log",
-        "git diff",
-        "git show"
-    ],
-    "roo-cline.deniedCommands": []
+    "r.rterm.linux": "/usr/bin/env",
+    "r.rterm.option": ["R", "--no-save", "--no-restore"],
+    "r.lsp.path": "R",
+    "r.lsp.args": ["--quiet", "--slave", "-e", "languageserver::run()"],
+    "r.plot.useHttpgd": true,
+    "workbench.colorTheme": "Catppuccin Latte",
+    "editor.minimap.enabled": false,
+    "chat.disableAIFeatures": true
+
 }

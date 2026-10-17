@@ -1,8 +1,12 @@
-# Development tooling: docker, git, direnv, compilers, search tools.
+# Development tooling: docker, git, direnv, nix-ld, compilers, search tools.
 {
   flake.modules.nixos.dev = {
     virtualisation.docker.enable = true;
     users.users.domdegi.extraGroups = [ "docker" ];
+
+    # Dynamic-loader shim so unpatched prebuilt binaries run: Julia artifacts,
+    # language servers downloaded by VS Code/Positron extensions, etc.
+    programs.nix-ld.enable = true;
   };
 
   flake.modules.homeManager.dev = { pkgs, ... }: {
@@ -12,7 +16,6 @@
       jq
       gcc
       claude-code
-      gemini-cli
     ];
 
     programs.git = {

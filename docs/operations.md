@@ -58,6 +58,14 @@ After a rebuild that changes HM-managed files, check activation output for
   }
   ```
 
+- **Language toolchains (R, Julia, Python, ...)**: don't add them here. Put
+  them in the project's own `flake.nix` devshell + `.envrc` (`use flake`);
+  direnv/nix-direnv (`dev.nix`) loads it on `cd`, and VS Code picks it up
+  via the `mkhl.direnv` extension. RStudio belongs in that devshell too
+  (`rstudioWrapper.override { packages = ...; }`, launched with
+  `nix develop .#rstudio -c rstudio`) so it sees the project's packages.
+  Keep projects under a persisted path (`~/projects`) — the nix-direnv
+  cache lives in `.direnv/` inside the project.
 - **Persist an app's state**: add the path to `modules/persistence.nix`
   (`users.domdegi.directories` or `.files`). ⚠️ For **files** that already
   exist, move them into `/persist` first (mirroring the path, e.g.

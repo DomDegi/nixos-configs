@@ -60,7 +60,7 @@ palette switching, no `theme/` indirection.
 | Module | Does |
 |---|---|
 | `terminal.nix` | Foot (transparency; static Catppuccin Mocha colors), fish (aliases → eza/bat/btop, fastfetch greeting), Starship (static Catppuccin palette prompt) + fastfetch (plain default layout), zoxide, **fzf** (Ctrl+R/Ctrl+T/Alt+C); system CLI basics (wget, p7zip, unzip, step-cli). |
-| `dev.nix` | Docker (+ `docker` group), git (identity, main default branch), direnv + nix-direnv, gcc, fd/ripgrep/jq, claude-code. |
+| `dev.nix` | Docker (+ `docker` group), nix-ld (unpatched prebuilt binaries: Julia artifacts, extension-downloaded LSPs), git (identity, main default branch), direnv + nix-direnv, gcc, fd/ripgrep/jq, claude-code. |
 | `nvim.nix` | Neovim: LazyVim starter under `config/nvim/` (out-of-store symlink for the whole directory, LazyVim edits incl. `lazy-lock.json` land in the repo) + LSPs (nil, lua, pyright, clang-tools, R, marksman) provided by Nix — mason is disabled in `lua/plugins/lsp.lua` so it never needs the network. |
 | `documents.nix` | HM: **markitdown** (anything→md), pandoc + tectonic (md→PDF), ocrmypdf (scans→searchable), typst. |
 | `desktop-apps.nix` | Spotify (plain, unthemed — see below), Obsidian, LibreOffice, media tools (mpv/imv/snapshot/kooha/calculator), zathura, seahorse/libsecret, webeep-sync (keyring-wrapped); `xdg.mimeApps` defaults. |
