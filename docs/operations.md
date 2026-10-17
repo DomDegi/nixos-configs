@@ -86,8 +86,9 @@ After a rebuild that changes HM-managed files, check activation output for
 
 ## Theming
 
-One static look (Catppuccin Mocha Lavender), inlined directly into
-`theming.nix`, `terminal.nix`, `locale.nix`, `greeter.nix`,
+GTK apps (Thunar, etc.) use plain Adwaita-dark with Papirus-Dark icons
+recolored to grey folders (`theming.nix`). Catppuccin Mocha Lavender is
+inlined directly into `terminal.nix`, `locale.nix`, `greeter.nix`,
 `config/niri/config.kdl`, `config/vscode/settings.json` and
 `config/zed/settings.json` — no runtime switcher, no `theme/_palettes.nix`
 indirection. To change the look, edit those files' hardcoded values directly
@@ -126,6 +127,17 @@ sops secrets/secrets.yaml            # edit decrypted view in $EDITOR
   `config.sops.secrets."name".path`.
 - New recipient (second machine): add its age public key to `.sops.yaml`,
   then `sops updatekeys secrets/secrets.yaml`.
+
+## Desktop & file types
+
+- **Files show no icons in Thunar**: something in `~/.local/share/icons/`
+  (persisted) is shadowing the Nix icon theme with a partial copy — e.g. an old
+  `Papirus-Dark/` left by a recolor tool. Delete that copy; the theme comes
+  from `theming.nix`.
+- **A file opens in the wrong app**: defaults live in `modules/default-apps.nix`;
+  find the type with `gio info -a standard::content-type FILE` (or
+  `xdg-mime query filetype FILE`) and add it there. Ad-hoc "Open With → set
+  default" choices are lost on rebuild, since `mimeapps.list` is HM-owned.
 
 ## Disaster recovery
 

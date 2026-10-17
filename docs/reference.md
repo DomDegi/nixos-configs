@@ -38,17 +38,34 @@ Music = A2DP (quality, no mic), Call = HFP (mic works).
 Bootloader (GRUB dual-boot with Windows), kernel, and the NTFS data
 partitions shared with the Windows install.
 
+## `default-apps.nix`
+
+*Contributes to: homeManager*
+
+Default applications per file type (xdg.mimeApps) and the small launchers
+behind them:
+ - open-pdf: PDFs inside an Obsidian vault open in Obsidian, all others
+   in Firefox (vaults read from ~/.config/obsidian/obsidian.json).
+ - rstudio-project: launches RStudio inside the nearest project flake's
+   `rstudio` devshell (walks up from the file), so it sees that project's
+   R packages. RStudio itself is never installed system-wide.
+ - R / R Markdown / Quarto / .Rproj MIME types (shared-mime-info has none,
+   so they'd be plain text).
+Editors: Zed is the default for code/text (fast to open), VS Code for
+notebooks and R; the other editors are pre-listed in every "Open With"
+menu so they're one click away.
+
 ## `desktop-apps.nix`
 
 *Contributes to: homeManager*
 
-GUI applications and their default-application (MIME) wiring.
+GUI applications (default file-type wiring lives in default-apps.nix).
 
 ## `dev.nix`
 
 *Contributes to: homeManager nixos*
 
-Development tooling: docker, git, direnv, nix-ld, compilers, search tools.
+Development tooling: docker, git, direnv, nix-ld, micro ($EDITOR), compilers, search tools.
 
 ## `display-mode.nix`
 
@@ -167,13 +184,6 @@ full-system theme-switcher.
 
 Hybrid AMD + Nvidia graphics (PRIME offload; dGPU powers down when idle).
 
-## `nvim.nix`
-
-*Contributes to: homeManager*
-
-Neovim: LazyVim starter (config/nvim/) + language servers, installed by
-Nix so LazyVim's LSP config never needs mason to hit the network.
-
 ## `persistence.nix`
 
 *Contributes to: nixos*
@@ -204,15 +214,25 @@ Catppuccin Mocha Lavender — no runtime theme switching.
 *Contributes to: homeManager nixos*
 
 GTK, cursors, icons, fonts, dconf/xfconf, session variables — a single
-static Catppuccin Mocha Lavender look. No runtime switching, no
-multi-palette GTK theme installs: this is baseline app appearance, not
-theming infrastructure.
+static look. Apps: plain Adwaita-dark (neutral dark grey, built into
+GTK3; GTK4/libadwaita follows color-scheme = prefer-dark). Icons:
+Papirus-Dark with grey folders (recolored at build time via the
+package's `color` argument). Cursor: Catppuccin Mocha dark. No runtime
+switching, no multi-palette installs.
+
+Never keep a copy of an icon theme in ~/.local/share/icons (persisted):
+a stale/partial user copy shadows the Nix one and files lose their icons.
 
 ## `thunar.nix`
 
 *Contributes to: homeManager nixos*
 
-Thunar file manager + its "open terminal here" integration with foot.
+Thunar file manager: foot as "open terminal here", and right-click custom
+actions (~/.config/Thunar/uca.xml, owned by HM): Extract Here, Compress to
+.zip, Open folder in VS Code / Zed, Open Terminal Here. Archives
+double-click into xarchiver. Extraction uses libarchive's bsdtar (zip, tar.*,
+7z, rar) with 7z as fallback; an archive with a single top-level folder is
+unpacked without an extra wrapping directory.
 
 ## `users.nix`
 

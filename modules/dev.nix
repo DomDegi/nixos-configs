@@ -1,4 +1,4 @@
-# Development tooling: docker, git, direnv, nix-ld, compilers, search tools.
+# Development tooling: docker, git, direnv, nix-ld, micro ($EDITOR), compilers, search tools.
 {
   flake.modules.nixos.dev = {
     virtualisation.docker.enable = true;
@@ -16,7 +16,14 @@
       jq
       gcc
       claude-code
+      micro # nano-style terminal editor: Ctrl+S save, Ctrl+Q quit
     ];
+
+    # Used by git commit, sudoedit, crontab -e, ...
+    home.sessionVariables = {
+      EDITOR = "micro";
+      VISUAL = "micro";
+    };
 
     programs.git = {
       enable = true;

@@ -79,7 +79,7 @@
           # Development / Terminal
           ".local/share/fish"
           ".local/share/direnv"
-          ".local/share/nvim" # Optional: Keeps you from re-downloading plugins on boot
+          ".local/share/zed" # Zed extensions + language servers it downloads
           ".local/share/zoxide"
 
           # R/Julia (packages come from each project's devshell; these hold

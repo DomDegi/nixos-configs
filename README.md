@@ -2,7 +2,7 @@
 
 Personal NixOS flake for a Lenovo Legion 5 (hybrid AMD/Nvidia), built around the
 **Niri** scrollable tiling compositor, the **Noctalia v5** shell, and a single
-static **Catppuccin Mocha Lavender** look, on an **ephemeral BTRFS root** that
+static dark look (Adwaita-dark apps, Catppuccin accents), on an **ephemeral BTRFS root** that
 is wiped on every boot (Impermanence).
 
 - **Compositor:** [Niri](https://github.com/YaLTeR/niri) · **Bar/Shell:** [Noctalia v5](https://github.com/noctalia-dev/noctalia) with custom Luau widgets
@@ -39,14 +39,14 @@ hardware-configuration.nix   # generated; kept OUT of modules/ on purpose
 .sops.yaml                   # sops recipient config (age public key)
 secrets/secrets.yaml         # encrypted secrets (safe to publish)
 config/                      # raw configs, symlinked out-of-store (see below)
-  niri/config.kdl  nvim/ (LazyVim)  vscode/settings.json  zed/settings.json
+  niri/config.kdl  vscode/settings.json  zed/settings.json
   noctalia/plugins/{battery-conserve,display-mode,airpods-audio,wallpaper-picker}/
 modules/                     # one feature per file — auto-imported
   hosts/nixos.nix  home-manager.nix  persistence.nix  ephemeral-root.nix
   secrets.nix  users.nix  boot.nix  nix.nix  locale.nix  network.nix
   nvidia.nix  audio.nix  bluetooth-airpods.nix  battery-conserve.nix
   display-mode.nix  niri.nix  greeter.nix  theming.nix  terminal.nix
-  dev.nix  nvim.nix  documents.nix  desktop-apps.nix  thunar.nix
+  dev.nix  documents.nix  desktop-apps.nix  default-apps.nix  thunar.nix
   firefox.nix  vscode.nix  zed.nix  noctalia.nix  wallpaper.nix
 ```
 
@@ -59,7 +59,7 @@ module change (enforced by `CLAUDE.md`).
 
 ## 🔗 Hybrid configs (editable *and* tracked)
 
-GUI-edited files (`config/niri/config.kdl`, the whole `nvim/` LazyVim tree,
+GUI-edited files (`config/niri/config.kdl`,
 VS Code & Zed `settings.json`) are linked with `mkOutOfStoreSymlink`: the app
 writes straight into this repo's working tree, so edits apply instantly (no
 rebuild) and show up in `git status` for review.

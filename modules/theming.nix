@@ -1,18 +1,21 @@
 # GTK, cursors, icons, fonts, dconf/xfconf, session variables — a single
-# static Catppuccin Mocha Lavender look. No runtime switching, no
-# multi-palette GTK theme installs: this is baseline app appearance, not
-# theming infrastructure.
+# static look. Apps: plain Adwaita-dark (neutral dark grey, built into
+# GTK3; GTK4/libadwaita follows color-scheme = prefer-dark). Icons:
+# Papirus-Dark with grey folders (recolored at build time via the
+# package's `color` argument). Cursor: Catppuccin Mocha dark. No runtime
+# switching, no multi-palette installs.
+#
+# Never keep a copy of an icon theme in ~/.local/share/icons (persisted):
+# a stale/partial user copy shadows the Nix one and files lose their icons.
 {
   flake.modules.nixos.theming = { pkgs, ... }:
+    let
+      papirus = pkgs.papirus-icon-theme.override { color = "grey"; };
+    in
     {
-      environment.systemPackages = with pkgs; [
-        (catppuccin-gtk.override {
-          accents = [ "lavender" ];
-          size = "standard";
-          variant = "mocha";
-        })
-        catppuccin-cursors.mochaDark
-        papirus-icon-theme
+      environment.systemPackages = [
+        pkgs.catppuccin-cursors.mochaDark
+        papirus
       ];
 
       environment.sessionVariables = {
@@ -62,17 +65,11 @@
           gtk-application-prefer-dark-theme = 1;
         };
         gtk4.theme = null;
-        theme = {
-          name = "catppuccin-mocha-lavender-standard";
-          package = pkgs.catppuccin-gtk.override {
-            accents = [ "lavender" ];
-            size = "standard";
-            variant = "mocha";
-          };
-        };
+        # Adwaita-dark ships inside GTK3 itself — no package needed.
+        theme.name = "Adwaita-dark";
         iconTheme = {
           name = "Papirus-Dark";
-          package = pkgs.papirus-icon-theme;
+          package = pkgs.papirus-icon-theme.override { color = "grey"; };
         };
         font = {
           name = "JetBrainsMono Nerd Font";
@@ -83,7 +80,7 @@
       dconf.settings = {
         "org/gnome/desktop/interface" = {
           color-scheme = "prefer-dark";
-          gtk-theme = "catppuccin-mocha-lavender-standard";
+          gtk-theme = "Adwaita-dark";
           cursor-theme = "catppuccin-mocha-dark-cursors";
           icon-theme = "Papirus-Dark";
         };
@@ -91,7 +88,7 @@
 
       xfconf.settings = {
         xsettings = {
-          "Net/ThemeName" = "catppuccin-mocha-lavender-standard";
+          "Net/ThemeName" = "Adwaita-dark";
           "Net/IconThemeName" = "Papirus-Dark";
         };
       };
