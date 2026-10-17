@@ -13,6 +13,14 @@
     "r.plot.useHttpgd": true,
     "workbench.colorTheme": "Catppuccin Latte",
     "editor.minimap.enabled": false,
-    "chat.disableAIFeatures": true
+    "chat.disableAIFeatures": true,
 
+    "latex-workshop.latex.autoBuild.run": "onSave",
+    "latex-workshop.view.pdf.viewer": "tab",
+    "latex-workshop.latex.autoClean.run": "onBuilt",
+    "latex-workshop.latex.outDir": "%DIR%",
+
+    "tinymist.serverPath": "/etc/profiles/per-user/domdegi/bin/tinymist",
+    "tinymist.exportPdf": "onSave",
+    "tinymist.formatterMode": "typstyle"
 }

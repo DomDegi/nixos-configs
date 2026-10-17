@@ -1,7 +1,7 @@
 # GTK, cursors, icons, fonts, dconf/xfconf, session variables — a single
-# static look. Apps: plain Adwaita-dark (neutral dark grey, built into
-# GTK3; GTK4/libadwaita follows color-scheme = prefer-dark). Icons:
-# Papirus-Dark with grey folders (recolored at build time via the
+# static look. Apps: plain Adwaita-dark (neutral dark grey, from
+# gnome-themes-extra; GTK4/libadwaita follows color-scheme = prefer-dark).
+# Icons: Papirus-Dark with soft sand-yellow ("paleorange") folders (recolored at build time via the
 # package's `color` argument). Cursor: Catppuccin Mocha dark. No runtime
 # switching, no multi-palette installs.
 #
@@ -10,11 +10,12 @@
 {
   flake.modules.nixos.theming = { pkgs, ... }:
     let
-      papirus = pkgs.papirus-icon-theme.override { color = "grey"; };
+      papirus = pkgs.papirus-icon-theme.override { color = "paleorange"; };
     in
     {
       environment.systemPackages = [
         pkgs.catppuccin-cursors.mochaDark
+        pkgs.gnome-themes-extra # provides the "Adwaita-dark" GTK3 theme
         papirus
       ];
 
@@ -65,11 +66,16 @@
           gtk-application-prefer-dark-theme = 1;
         };
         gtk4.theme = null;
-        # Adwaita-dark ships inside GTK3 itself — no package needed.
-        theme.name = "Adwaita-dark";
+        # "Adwaita-dark" as a *theme name* comes from gnome-themes-extra; GTK3
+        # only has it built in as a variant, so without this package GTK
+        # silently falls back to light Adwaita.
+        theme = {
+          name = "Adwaita-dark";
+          package = pkgs.gnome-themes-extra;
+        };
         iconTheme = {
           name = "Papirus-Dark";
-          package = pkgs.papirus-icon-theme.override { color = "grey"; };
+          package = pkgs.papirus-icon-theme.override { color = "paleorange"; };
         };
         font = {
           name = "JetBrainsMono Nerd Font";

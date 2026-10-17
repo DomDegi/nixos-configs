@@ -52,8 +52,8 @@ behind them:
  - R / R Markdown / Quarto / .Rproj MIME types (shared-mime-info has none,
    so they'd be plain text).
 Editors: Zed is the default for code/text (fast to open), VS Code for
-notebooks and R; the other editors are pre-listed in every "Open With"
-menu so they're one click away.
+notebooks, R, LaTeX and Typst (live preview); the other editors are
+pre-listed in every "Open With" menu so they're one click away.
 
 ## `desktop-apps.nix`
 
@@ -87,7 +87,11 @@ Regenerate with:  nix run .#docs > docs/reference.md
 
 *Contributes to: homeManager*
 
-Document tooling: converting, compiling and processing course material.
+Document tooling: writing, compiling and processing course material.
+LaTeX (TeX Live medium + latexmk) and Typst (+ tinymist LSP) both preview
+live in VS Code: LaTeX Workshop rebuilds on save, Tinymist on every
+keystroke (config in config/vscode/settings.json; per-folder PDF export
+lives in that folder's .vscode/settings.json, e.g. the Obsidian vault).
 
 ## `ephemeral-root.nix`
 
@@ -214,9 +218,9 @@ Catppuccin Mocha Lavender — no runtime theme switching.
 *Contributes to: homeManager nixos*
 
 GTK, cursors, icons, fonts, dconf/xfconf, session variables — a single
-static look. Apps: plain Adwaita-dark (neutral dark grey, built into
-GTK3; GTK4/libadwaita follows color-scheme = prefer-dark). Icons:
-Papirus-Dark with grey folders (recolored at build time via the
+static look. Apps: plain Adwaita-dark (neutral dark grey, from
+gnome-themes-extra; GTK4/libadwaita follows color-scheme = prefer-dark).
+Icons: Papirus-Dark with soft sand-yellow ("paleorange") folders (recolored at build time via the
 package's `color` argument). Cursor: Catppuccin Mocha dark. No runtime
 switching, no multi-palette installs.
 

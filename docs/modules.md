@@ -42,7 +42,7 @@ palette switching, no `theme/` indirection.
 
 | Module | Does |
 |---|---|
-| `theming.nix` | GTK3/4 Adwaita-dark (neutral dark grey, built into GTK) + Papirus-Dark icons with **grey folders** (`papirus-icon-theme.override { color = "grey"; }`) + Catppuccin cursors + fonts + dconf/xfconf + GTK bookmarks. Deliberately does NOT set `GTK_THEME` (would pin GTK3 apps globally); `gtk-{3,4}.0/settings.ini` come from the `gtk` HM module directly. Never keep an icon-theme copy in `~/.local/share/icons` (persisted) — it shadows the Nix one. |
+| `theming.nix` | GTK3/4 Adwaita-dark (neutral dark grey; the theme name needs `gnome-themes-extra`, without it GTK silently falls back to light Adwaita) + Papirus-Dark icons with soft sand-yellow folders (`papirus-icon-theme.override { color = "paleorange"; }`) + Catppuccin cursors + fonts + dconf/xfconf + GTK bookmarks. Deliberately does NOT set `GTK_THEME` (would pin GTK3 apps globally); `gtk-{3,4}.0/settings.ini` come from the `gtk` HM module directly. Never keep an icon-theme copy in `~/.local/share/icons` (persisted) — it shadows the Nix one. |
 | `wallpaper.nix` | Wallpapers in `~/Pictures/Wallpapers/` (flat, auto-created): `wallpaper-pick` script (list/status/set-by-index → `noctalia msg wallpaper-set`) + `domdegi/wallpaper-picker` Noctalia widget (bar button + panel menu rendering `ui.image` thumbnails in a 2-col grid, active one bordered). |
 
 ## Desktop
@@ -61,9 +61,9 @@ palette switching, no `theme/` indirection.
 |---|---|
 | `terminal.nix` | Foot (transparency; static Catppuccin Mocha colors), fish (aliases → eza/bat/btop, fastfetch greeting), Starship (static Catppuccin palette prompt) + fastfetch (plain default layout), zoxide, **fzf** (Ctrl+R/Ctrl+T/Alt+C); system CLI basics (wget, p7zip, unzip, step-cli). |
 | `dev.nix` | Docker (+ `docker` group), micro as `$EDITOR`/`$VISUAL`, nix-ld (unpatched prebuilt binaries: Julia artifacts, extension-downloaded LSPs), git (identity, main default branch), direnv + nix-direnv, gcc, fd/ripgrep/jq, claude-code. |
-| `documents.nix` | HM: pandoc + tectonic (md→PDF), ocrmypdf (scans→searchable), typst. |
+| `documents.nix` | HM: **TeX Live medium** (pdf/xe/lualatex + latexmk; also pandoc's PDF engine), **typst + tinymist** (LSP/live preview/PDF export), pandoc, ocrmypdf. Live preview happens in VS Code: LaTeX Workshop (rebuild on save, PDF in a tab) and Tinymist (on every keystroke); settings in `config/vscode/settings.json`. |
 | `desktop-apps.nix` | Spotify (plain, unthemed — see below), Obsidian, LibreOffice, media tools (mpv/imv/snapshot/kooha/calculator), seahorse/libsecret, webeep-sync (keyring-wrapped). |
-| `default-apps.nix` | `xdg.mimeApps` for everything: code/text → **Zed** (VS Code pre-listed in "Open With"), `.ipynb`/`.R`/`.Rmd`/`.qmd` → **VS Code** (Zed + RStudio listed), `.Rproj` → RStudio, PDF → `open-pdf` (**Obsidian** if the file is inside a vault from `~/.config/obsidian/obsidian.json`, else **Firefox**), HTML/SVG → Firefox, images → imv, audio/video → mpv, office/CSV → LibreOffice, archives → xarchiver. Adds R/Rmd/Quarto/Rproj MIME types and `rstudio-project` (runs `nix develop <nearest flake>#rstudio -c rstudio`). |
+| `default-apps.nix` | `xdg.mimeApps` for everything: code/text → **Zed** (VS Code pre-listed in "Open With"), `.ipynb`/`.R`/`.Rmd`/`.qmd`/`.tex`/`.bib`/`.typ` → **VS Code** (Zed + RStudio listed), `.Rproj` → RStudio, PDF → `open-pdf` (**Obsidian** if the file is inside a vault from `~/.config/obsidian/obsidian.json`, else **Firefox**), HTML/SVG → Firefox, images → imv, audio/video → mpv, office/CSV → LibreOffice, archives → xarchiver. Adds R/Rmd/Quarto/Rproj MIME types and `rstudio-project` (runs `nix develop <nearest flake>#rstudio -c rstudio`). |
 | `firefox.nix` | System enable, no enterprise policies. Profile lives in persisted `~/.config/mozilla`. |
 | `vscode.nix` | VS Code; `config/vscode/settings.json` via out-of-store symlink (GUI edits land in git). |
 | `zed.nix` | Zed (default editor for code/text; extensions persisted in `~/.local/share/zed`); `config/zed/settings.json` via out-of-store symlink. |

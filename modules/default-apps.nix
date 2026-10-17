@@ -8,8 +8,8 @@
 #  - R / R Markdown / Quarto / .Rproj MIME types (shared-mime-info has none,
 #    so they'd be plain text).
 # Editors: Zed is the default for code/text (fast to open), VS Code for
-# notebooks and R; the other editors are pre-listed in every "Open With"
-# menu so they're one click away.
+# notebooks, R, LaTeX and Typst (live preview); the other editors are
+# pre-listed in every "Open With" menu so they're one click away.
 {
   flake.modules.homeManager.default-apps = { pkgs, lib, ... }:
     let
@@ -99,13 +99,15 @@
         "text/x-python" "text/x-python3" "text/julia" "text/rust" "text/x-go"
         "text/x-csrc" "text/x-chdr" "text/x-c++src" "text/x-c++hdr"
         "text/x-java" "text/x-lua" "text/x-nix" "text/x-shellscript"
-        "text/x-makefile" "text/x-cmake" "text/x-tex" "text/x-matlab"
+        "text/x-makefile" "text/x-cmake" "text/x-matlab"
         "text/css" "text/javascript" "application/json" "application/toml"
         "application/yaml" "application/xml" "application/sql"
         "application/x-zerosize"
       ];
       # VS Code first (R extension / notebooks), the rest in "Open With".
       rTypes = [ "text/x-r" "text/x-r-markdown" "text/x-quarto" ];
+      # LaTeX/Typst: VS Code first (LaTeX Workshop / Tinymist live preview).
+      docTypes = [ "text/x-tex" "text/x-bibtex" "text/vnd.typst" ];
       archiveTypes = [
         "application/zip" "application/x-7z-compressed" "application/vnd.rar"
         "application/x-rar" "application/x-tar" "application/x-compressed-tar"
@@ -151,6 +153,7 @@
         defaultApplications =
           for codeTypes [ zed code ]
           // for rTypes [ code ]
+          // for docTypes [ code ]
           // for archiveTypes [ "xarchiver.desktop" ]
           // for imageTypes [ "imv.desktop" ]
           // for mediaTypes [ "mpv.desktop" ]
@@ -181,6 +184,7 @@
         associations.added =
           for codeTypes [ zed code ]
           // for rTypes [ code zed rstudio ]
+          // for docTypes [ zed ]
           // {
             "inode/directory" = [ code zed ];
             "application/pdf" = [ "firefox.desktop" ];

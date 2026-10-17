@@ -30,7 +30,7 @@ modules/
 ├── hosts/nixos.nix          # Assembles the system from ALL flake.modules.nixos.*
 ├── home-manager.nix         # Pipes ALL flake.modules.homeManager.* into user domdegi
 ├── persistence.nix          # Ephemeral root allowlist (paths that survive reboot)
-├── theming.nix              # Static look: Adwaita-dark GTK, grey Papirus icons (no switcher)
+├── theming.nix              # Static look: Adwaita-dark GTK, Papirus icons with sand-yellow folders (no switcher)
 ├── boot.nix, nvidia.nix, audio.nix, niri.nix, ...  # One feature per file
 └── _scratch.nix             # (disabled; _ prefix = not imported)
 ```
@@ -79,7 +79,7 @@ Any commit that adds/removes/renames a module or meaningfully changes what a mod
 - **Noctalia's `plugins.enabled`:** Owned exclusively by `modules/noctalia.nix` — never enable/disable plugins elsewhere. The `~/.local/state/noctalia/settings.toml` (persisted) is the runtime truth; `programs.noctalia.settings` is only a first-run seed.
 - **Noctalia plugin.toml requires `plugin_api` (integer):** not `min_noctalia` — that key is not recognized and silently ignored. A missing `plugin_api` fails the whole manifest with no visible error; the widget just never appears on the bar. Icon/glyph names must be real Tabler names.
 - **`noctalia` flake input is pinned** to a specific rev in `flake.nix` (no tagged releases, has broken our plugins before) — `nix flake update` will not move it; bump it deliberately and re-verify the widgets.
-- **Colors:** GTK apps use plain Adwaita-dark + grey Papirus icons (`theming.nix`); Catppuccin Mocha Lavender is hardcoded directly in `terminal.nix`, `locale.nix`, `greeter.nix`, `config/niri/config.kdl`, and the VS Code/Zed settings.json — no palette system to keep in sync.
+- **Colors:** GTK apps use plain Adwaita-dark + Papirus icons with sand-yellow folders (`theming.nix`); Catppuccin Mocha Lavender is hardcoded directly in `terminal.nix`, `locale.nix`, `greeter.nix`, `config/niri/config.kdl`, and the VS Code/Zed settings.json — no palette system to keep in sync.
 - **`modules/` auto-import:** Never leave scratch `.nix` files there — prefix with `_` to disable. Only files meant to be features should exist.
 - **sudo commands:** Interactive-only for the user. Always hand one short command or a script file to run; never paste multi-line sudo blocks (fish mangles them).
 - **Never push:** `old-history`, `backup/pre-dendritic`, `archive-persistent-home` (pre-public history with inline password hash).

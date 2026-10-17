@@ -87,7 +87,7 @@ After a rebuild that changes HM-managed files, check activation output for
 ## Theming
 
 GTK apps (Thunar, etc.) use plain Adwaita-dark with Papirus-Dark icons
-recolored to grey folders (`theming.nix`). Catppuccin Mocha Lavender is
+with folders recolored to a soft sand-yellow ("paleorange") (`theming.nix`). Catppuccin Mocha Lavender is
 inlined directly into `terminal.nix`, `locale.nix`, `greeter.nix`,
 `config/niri/config.kdl`, `config/vscode/settings.json` and
 `config/zed/settings.json` — no runtime switcher, no `theme/_palettes.nix`
@@ -127,6 +127,20 @@ sops secrets/secrets.yaml            # edit decrypted view in $EDITOR
   `config.sops.secrets."name".path`.
 - New recipient (second machine): add its age public key to `.sops.yaml`,
   then `sops updatekeys secrets/secrets.yaml`.
+
+## LaTeX & Typst notes (live preview)
+
+- **LaTeX**: open the `.tex` in VS Code → LaTeX Workshop builds with latexmk
+  on every save and shows the PDF in a tab (Ctrl+Alt+V if it isn't open;
+  Ctrl+click in the PDF jumps to the source). Missing package? It's TeX Live
+  *medium* — add it via `texliveMedium.withPackages` in `documents.nix`.
+- **Typst**: open the `.typ` in VS Code → Tinymist preview (Ctrl+K V) updates
+  on every keystroke. Globally the PDF is exported on save; inside the
+  Obsidian vault `~/shared/Vault/.vscode/settings.json` (not in this repo)
+  switches that to `onType`, so the PDF next to the note refreshes live in
+  Obsidian too.
+- Both extensions are marketplace installs (persisted in `~/.vscode`); Tinymist
+  uses the Nix `tinymist` binary via `tinymist.serverPath`.
 
 ## Desktop & file types
 
