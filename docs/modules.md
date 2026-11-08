@@ -59,7 +59,7 @@ palette switching, no `theme/` indirection.
 
 | Module | Does |
 |---|---|
-| `terminal.nix` | Foot (transparency; static Catppuccin Mocha colors), fish (aliases → eza/bat/btop, fastfetch greeting), Starship (static Catppuccin palette prompt) + fastfetch (plain default layout), zoxide, **fzf** (Ctrl+R/Ctrl+T/Alt+C); system CLI basics (wget, p7zip, unzip, step-cli). |
+| `terminal.nix` | Foot (transparency; static Catppuccin Mocha colors), fish (aliases → eza/bat/btop, fastfetch greeting), Starship (static Catppuccin palette prompt) + fastfetch (compact grouped tree: system/desktop/hardware, colored keys, NixOS_small text logo — foot-safe), zoxide, **fzf** (Ctrl+R/Ctrl+T/Alt+C); system CLI basics (wget, p7zip, unzip, step-cli). |
 | `dev.nix` | Docker (+ `docker` group), micro as `$EDITOR`/`$VISUAL`, nix-ld (unpatched prebuilt binaries: Julia artifacts, extension-downloaded LSPs), git (identity, main default branch), direnv + nix-direnv, gcc, fd/ripgrep/jq, claude-code. |
 | `documents.nix` | HM: **TeX Live medium** (pdf/xe/lualatex + latexmk; also pandoc's PDF engine), **typst + tinymist** (LSP/live preview/PDF export), pandoc, ocrmypdf. Live preview happens in VS Code: LaTeX Workshop (rebuild on save, PDF in a tab) and Tinymist (on every keystroke); settings in `config/vscode/settings.json`. |
 | `desktop-apps.nix` | Spotify (plain, unthemed — see below), Obsidian, LibreOffice, media tools (mpv/imv/snapshot/kooha/calculator), seahorse/libsecret, webeep-sync (keyring-wrapped). |

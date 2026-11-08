@@ -67,32 +67,38 @@
       };
     };
 
-    # Fastfetch — trimmed module list with separators; static layout (not
-    # color-generated per theme), just fastfetch's own default coloring
-    # instead of the bare/unstyled default preset.
+    # Fastfetch — compact grouped tree (system / desktop / hardware), each
+    # group keyed in its own ANSI color so foot's Noctalia palette applies.
+    # Text logo only: foot has no kitty-graphics, and NixOS_small's sextant
+    # glyphs are drawn natively by foot.
     programs.fastfetch = {
       enable = true;
       settings = {
-        logo.source = "NixOS_small";
-        display.separator = "  ";
+        logo = {
+          source = "NixOS_small";
+          padding = { top = 2; left = 1; right = 3; };
+        };
+        display = {
+          separator = " ";
+          key.width = 16;
+        };
         modules = [
+          { type = "title"; format = "{user-name-colored}{at-symbol-colored}{host-name-colored}"; }
+          { type = "os"; key = "╭─  OS"; keyColor = "blue"; format = "{pretty-name}"; }
+          { type = "kernel"; key = "├─  Kernel"; keyColor = "blue"; }
+          { type = "packages"; key = "├─ 󰏖 Packages"; keyColor = "blue"; format = "{nix-system} system · {nix-user} user"; }
+          { type = "uptime"; key = "╰─ 󰅐 Uptime"; keyColor = "blue"; }
           "break"
-          { type = "title"; }
-          "separator"
-          { type = "os"; key = " OS"; }
-          { type = "kernel"; key = " Kernel"; }
-          { type = "uptime"; key = " Uptime"; }
-          { type = "packages"; key = " Packages"; }
-          "separator"
-          { type = "wm"; key = " WM"; }
-          { type = "terminal"; key = " Terminal"; }
-          "separator"
-          { type = "cpu"; key = " CPU"; }
-          { type = "gpu"; key = " GPU"; }
-          { type = "memory"; key = " Memory"; }
-          { type = "disk"; key = " Disk"; folders = "/"; }
+          { type = "wm"; key = "╭─  WM"; keyColor = "magenta"; format = "{pretty-name}"; }
+          { type = "terminal"; key = "├─  Terminal"; keyColor = "magenta"; format = "{pretty-name}"; }
+          { type = "shell"; key = "╰─  Shell"; keyColor = "magenta"; format = "{pretty-name}"; }
           "break"
-          { type = "colors"; }
+          { type = "cpu"; key = "╭─  CPU"; keyColor = "green"; format = "{name} ({cores-logical})"; }
+          { type = "gpu"; key = "├─ 󰍛 GPU"; keyColor = "green"; format = "{name}"; }
+          { type = "memory"; key = "├─  Memory"; keyColor = "green"; }
+          { type = "disk"; key = "╰─ 󰋊 Disk"; keyColor = "green"; folders = "/"; format = "{size-used} / {size-total} ({size-percentage})"; }
+          "break"
+          { type = "colors"; symbol = "circle"; }
         ];
       };
     };
