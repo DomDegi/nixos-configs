@@ -52,6 +52,7 @@ palette switching, no `theme/` indirection.
 | `niri.nix` | Niri + XWayland(-satellite), GTK portal, brightnessctl + backlight udev rule, niri PATH fix; HM: `config/niri/config.kdl` (out-of-store symlink → live reload), playerctl. |
 | `greeter.nix` | Ly TTY login (static Catppuccin colors, no animation), gnome-keyring + PAM unlock on login. |
 | `noctalia.nix` | Noctalia v5 via HM module: systemd service, theme seed, **the only owner of `plugins.enabled`**. Runtime truth = `~/.local/state/noctalia/settings.toml` (persisted, GUI-managed). |
+| `claude-usage.nix` | HM: `claude-usage` script (Claude Code's OAuth token → Anthropic usage endpoint, undocumented; never refreshes the token) + its Noctalia widget: 5h session % on the bar, weekly % + reset countdowns in the tooltip, `tertiary`/`error` color at 70%/90%, notification at 90%, polls every 5 min, click to refresh. |
 | `display-mode.nix` | HM: `display-mode` script (extend ↔ mirror via wl-mirror; also Mod+P in config.kdl) + its Noctalia widget. |
 | `thunar.nix` | Thunar + volman plugin, gvfs, tumbler; HM: xarchiver (double-click archives), foot as "open terminal here", and right-click custom actions in `~/.config/Thunar/uca.xml`: **Extract Here** (`extract-here`: bsdtar → 7z fallback, lifts a single top-level folder), **Compress to .zip** (`compress-zip`), Open in VS Code / Zed, Open Terminal Here. |
 
@@ -72,7 +73,7 @@ palette switching, no `theme/` indirection.
 
 Hand-edited files symlinked out-of-store (writable, git-tracked):
 `niri/config.kdl`, `vscode/settings.json`,
-`zed/settings.json`, and four Noctalia Luau plugins (`battery-conserve`,
-`display-mode`, `airpods-audio`, `wallpaper-picker` — the last adds a
+`zed/settings.json`, and five Noctalia Luau plugins (`battery-conserve`,
+`display-mode`, `airpods-audio`, `claude-usage`, `wallpaper-picker` — the last adds a
 `panel.luau` menu), linked store-copied into `~/.local/share/noctalia/plugins/`
 by their feature modules.

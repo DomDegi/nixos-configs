@@ -38,6 +38,19 @@ Music = A2DP (quality, no mic), Call = HFP (mic works).
 Bootloader (GRUB dual-boot with Windows), kernel, and the NTFS data
 partitions shared with the Windows install.
 
+## `claude-usage.nix`
+
+*Contributes to: homeManager*
+
+Claude plan usage in the Noctalia bar: 5-hour session % (+ weekly % and
+reset countdowns in the tooltip), colored at 70% / 90%. The whole feature
+in one file.
+
+`claude-usage` reads Claude Code's OAuth token from
+~/.claude/.credentials.json and queries the (undocumented) endpoint the
+claude.ai usage page uses. It never refreshes the token itself — Claude Code
+does that whenever it runs — so an expired token just shows as "expired".
+
 ## `default-apps.nix`
 
 *Contributes to: homeManager*

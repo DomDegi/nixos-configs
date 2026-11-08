@@ -48,6 +48,7 @@
           "domdegi/display-mode"
           "domdegi/airpods-audio"
           "domdegi/wallpaper-picker"
+          "domdegi/claude-usage"
         ];
       };
     };

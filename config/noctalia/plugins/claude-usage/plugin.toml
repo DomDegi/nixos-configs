@@ -1,0 +1,13 @@
+id           = "domdegi/claude-usage"
+name         = "Claude Usage"
+version      = "1.0.0"
+plugin_api   = 3
+author       = "domdegi"
+license      = "MIT"
+icon         = "gauge"
+description  = "Claude plan usage: 5-hour session and weekly limits with reset countdowns."
+tags         = ["Bar"]
+
+[[widget]]
+id    = "widget"
+entry = "widget.luau"
