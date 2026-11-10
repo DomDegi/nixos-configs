@@ -1,0 +1,13 @@
+id           = "domdegi/power-flow"
+name         = "Power Flow"
+version      = "1.0.0"
+plugin_api   = 3
+author       = "domdegi"
+license      = "MIT"
+icon         = "battery-charging"
+description  = "Battery power flow in watts: charge rate on AC, system draw on battery, red when the charger can't keep up."
+tags         = ["Bar"]
+
+[[widget]]
+id    = "widget"
+entry = "widget.luau"

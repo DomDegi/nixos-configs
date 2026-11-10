@@ -42,14 +42,20 @@ partitions shared with the Windows install.
 
 *Contributes to: homeManager*
 
-Claude plan usage in the Noctalia bar: 5-hour session % (+ weekly % and
-reset countdowns in the tooltip), colored at 70% / 90%. The whole feature
-in one file.
+Claude plan usage in the Noctalia bar: 5-hour session / weekly limits with
+progress bars and reset countdowns, the claude.ai usage split, and the
+API-equivalent USD cost of Claude Code per window and per model. Colored at
+70% / 90%. The whole feature in one file.
 
 `claude-usage` reads Claude Code's OAuth token from
 ~/.claude/.credentials.json and queries the (undocumented) endpoint the
 claude.ai usage page uses. It never refreshes the token itself — Claude Code
 does that whenever it runs — so an expired token just shows as "expired".
+
+Costs come from Claude Code's local logs (~/.claude/projects/**/*.jsonl,
+deduplicated by message + request id) priced with the table below — what
+the same tokens would cost on the API, not what the plan bills. Only Claude
+Code on this machine counts; claude.ai chats are in the % but not the $.
 
 ## `default-apps.nix`
 
@@ -201,6 +207,13 @@ full-system theme-switcher.
 
 Hybrid AMD + Nvidia graphics (PRIME offload; dGPU powers down when idle).
 
+Hang guard: the proprietary driver (seen on 595.112.07) can deadlock its
+RM lock when an ACPI power-source event (charger plug/unplug) races driver
+init — kworkers and a udev-worker sit in D state forever. That stalls
+`switch-to-configuration` (udevd won't stop) and makes poweroff hang.
+Shorter stop timeouts + the hardware watchdog (wdat_wdt) during shutdown
+turn "hold the power button" into a ~1 min forced reset.
+
 ## `persistence.nix`
 
 *Contributes to: nixos*
@@ -208,6 +221,19 @@ Hybrid AMD + Nvidia graphics (PRIME offload; dGPU powers down when idle).
 Impermanence: what survives the ephemeral-root wipe (see
 ephemeral-root.nix). /home lives on the wiped @ subvolume too, so user
 state must be listed here — anything not listed dies at reboot.
+
+## `power-flow.nix`
+
+*Contributes to: homeManager*
+
+Battery power-flow widget for the Noctalia bar: charge rate on AC, real
+system draw on battery, red (+ notification) when the battery drains even
+though the charger is plugged in. The whole feature in one file.
+
+Only the battery is metered on this laptop (ADP0 exposes just `online`),
+so the widget shows the battery's net flow; with the charger in and the
+battery idle (full / conservation cap) it just shows "AC". It reads the
+world-readable sysfs files directly — no script, no permissions.
 
 ## `secrets.nix`
 

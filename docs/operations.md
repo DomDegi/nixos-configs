@@ -31,13 +31,27 @@ After a rebuild that changes HM-managed files, check activation output for
 
 - **Updating noctalia deliberately**: `noctalia.url` in `flake.nix` is
   pinned to a specific rev, not the default branch — it has no tagged
-  releases and has broken our 5 custom bar widgets before by changing the
+  releases and has broken our custom bar widgets before by changing the
   plugin manifest/IPC surface. To bump it: `nix flake lock --update-input
   noctalia`, `nh os switch`, then verify each widget in
   `config/noctalia/plugins/` still shows up on the bar (a manifest missing
   the mandatory `plugin_api` key, or a plugin dropped somewhere other than
   `~/.local/share/noctalia/plugins/<name>/`, fails silently — no bar icon,
   no error).
+- **Switch "stuck" / poweroff hangs — check for an Nvidia deadlock first.**
+  `journalctl -b -1 -k | grep -A30 "blocked for more than"`: if the stack
+  shows `rm_power_source_change_event` / `os_acquire_rwlock_write [nvidia]`,
+  the proprietary driver deadlocked its RM lock on an ACPI power-source
+  event (charger plug) racing driver init (seen once on 595.112.07). The
+  stuck udev-worker makes udevd unstoppable, so `switch-to-configuration`
+  waits on it and poweroff never completes. `nvidia.nix` caps stop jobs at
+  20 s and arms the hardware watchdog for shutdown (forced reset after
+  ~1 min), so it now self-recovers; nothing to do but reboot. If it recurs,
+  try `hardware.nvidia.open = true`.
+  Also: a switch restarts a lot (NetworkManager, nix-daemon, journald, HM,
+  your user services) — 10–30 s of no network and a flickering bar is
+  normal, not a hang. Don't power off mid-switch; give it a couple of
+  minutes and look at `journalctl -f` from another TTY first.
 - Prefer updating one input at a time
   (`nix flake lock --update-input nixpkgs`, etc.) over a blanket `nix flake
   update` when chasing down what broke after an upgrade — it tells you which

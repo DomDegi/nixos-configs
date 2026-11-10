@@ -30,7 +30,7 @@ Every `.nix` file under `modules/` is auto-imported by import-tree and is one
 
 | Module | Does |
 |---|---|
-| `nvidia.nix` | Hybrid AMD iGPU + Nvidia dGPU: PRIME offload (`nvidia-offload` cmd), fine-grained power management, proprietary driver. |
+| `nvidia.nix` | Hybrid AMD iGPU + Nvidia dGPU: PRIME offload (`nvidia-offload` cmd), fine-grained power management, proprietary driver. Hang guard: `DefaultTimeoutStopSec=20s` + `RebootWatchdogSec=1min` (wdat_wdt) so a driver deadlock can't stall a switch for 90 s or hang poweroff (see operations.md). |
 | `audio.nix` | PipeWire (+ALSA/pulse compat), rtkit, pavucontrol; HM: `pactl` CLI. |
 | `bluetooth-airpods.nix` | BlueZ locked to Classic (`bredr`) for AirPods; WirePlumber: hw-volume off, mSBC + SBC-XQ on, no LE-Audio roles. HM: `airpods-audio` script (music/A2DP ↔ call/HFP + volume resets) + its Noctalia widget. |
 | `battery-conserve.nix` | Lenovo conservation mode (cap ~60%): `battery_ctl` group + sysfs perms, `battery-conserve` script, NOPASSWD sudo rule; HM: Noctalia widget. |
@@ -52,7 +52,8 @@ palette switching, no `theme/` indirection.
 | `niri.nix` | Niri + XWayland(-satellite), GTK portal, brightnessctl + backlight udev rule, niri PATH fix; HM: `config/niri/config.kdl` (out-of-store symlink → live reload), playerctl. |
 | `greeter.nix` | Ly TTY login (static Catppuccin colors, no animation), gnome-keyring + PAM unlock on login. |
 | `noctalia.nix` | Noctalia v5 via HM module: systemd service, theme seed, **the only owner of `plugins.enabled`**. Runtime truth = `~/.local/state/noctalia/settings.toml` (persisted, GUI-managed). |
-| `claude-usage.nix` | HM: `claude-usage` script (Claude Code's OAuth token → Anthropic usage endpoint, undocumented; never refreshes the token) + its Noctalia widget: 5h session % on the bar, weekly % + reset countdowns in the tooltip, `tertiary`/`error` color at 70%/90%, notification at 90%, polls every 5 min, click to refresh. |
+| `claude-usage.nix` | HM: `claude-usage` script (Claude Code's OAuth token → Anthropic usage endpoint, undocumented; never refreshes the token) + its Noctalia widget. Bar: click cycles session % → weekly % → session $. Tooltip: progress bars + reset countdowns, per-model weekly caps, Claude Code/chat split, and the **API-equivalent USD** per window and per model (from `~/.claude/projects/**/*.jsonl`, deduped, priced by the table in the module — this machine's Claude Code only). `tertiary`/`error` at 70%/90%, notification at 90%. Polls every 5 min; on 429/offline keeps the last reading marked stale (offline retries every 30 s); right-click refreshes. |
+| `power-flow.nix` | HM: Noctalia widget reading BAT0/ADP0 sysfs directly (no script). `+W` charge rate on AC, `−W` real system draw on battery with time left, **red `−W` + notification when the battery drains with the charger plugged in**; `AC` when the battery is idle (full / conservation cap — the adapter isn't metered). 3 s poll, ~15 s average. |
 | `display-mode.nix` | HM: `display-mode` script (extend ↔ mirror via wl-mirror; also Mod+P in config.kdl) + its Noctalia widget. |
 | `thunar.nix` | Thunar + volman plugin, gvfs, tumbler; HM: xarchiver (double-click archives), foot as "open terminal here", and right-click custom actions in `~/.config/Thunar/uca.xml`: **Extract Here** (`extract-here`: bsdtar → 7z fallback, lifts a single top-level folder), **Compress to .zip** (`compress-zip`), Open in VS Code / Zed, Open Terminal Here. |
 
@@ -73,7 +74,7 @@ palette switching, no `theme/` indirection.
 
 Hand-edited files symlinked out-of-store (writable, git-tracked):
 `niri/config.kdl`, `vscode/settings.json`,
-`zed/settings.json`, and five Noctalia Luau plugins (`battery-conserve`,
-`display-mode`, `airpods-audio`, `claude-usage`, `wallpaper-picker` — the last adds a
+`zed/settings.json`, and six Noctalia Luau plugins (`battery-conserve`,
+`display-mode`, `airpods-audio`, `claude-usage`, `power-flow`, `wallpaper-picker` — the last adds a
 `panel.luau` menu), linked store-copied into `~/.local/share/noctalia/plugins/`
 by their feature modules.

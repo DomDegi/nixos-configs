@@ -49,6 +49,7 @@
           "domdegi/airpods-audio"
           "domdegi/wallpaper-picker"
           "domdegi/claude-usage"
+          "domdegi/power-flow"
         ];
       };
     };

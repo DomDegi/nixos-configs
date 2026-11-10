@@ -40,13 +40,13 @@ hardware-configuration.nix   # generated; kept OUT of modules/ on purpose
 secrets/secrets.yaml         # encrypted secrets (safe to publish)
 config/                      # raw configs, symlinked out-of-store (see below)
   niri/config.kdl  vscode/settings.json  zed/settings.json
-  noctalia/plugins/{battery-conserve,display-mode,airpods-audio,claude-usage,wallpaper-picker}/
+  noctalia/plugins/{battery-conserve,display-mode,airpods-audio,claude-usage,power-flow,wallpaper-picker}/
 modules/                     # one feature per file — auto-imported
   hosts/nixos.nix  home-manager.nix  persistence.nix  ephemeral-root.nix
   secrets.nix  users.nix  boot.nix  nix.nix  locale.nix  network.nix
   nvidia.nix  audio.nix  bluetooth-airpods.nix  battery-conserve.nix
   claude-usage.nix  display-mode.nix  niri.nix  greeter.nix  theming.nix  terminal.nix
-  dev.nix  documents.nix  desktop-apps.nix  default-apps.nix  thunar.nix
+  power-flow.nix  dev.nix  documents.nix  desktop-apps.nix  default-apps.nix  thunar.nix
   firefox.nix  vscode.nix  zed.nix  noctalia.nix  wallpaper.nix
 ```
 
@@ -110,5 +110,6 @@ More recipes in [docs/operations.md](docs/operations.md).
 Custom scripts wired to Noctalia bar widgets: `battery-conserve` (Lenovo 60%
 charge cap), `display-mode` (extend ↔ mirror via wl-mirror, also on Mod+P),
 `airpods-audio` (A2DP music ↔ HFP call profile with mic fixes),
-`claude-usage` (Claude 5h/weekly plan limits with reset countdowns),
+`claude-usage` (Claude 5h/weekly limits, reset countdowns, API-equivalent $ per model),
+`power-flow` (battery watts in/out, red when the charger can't keep up),
 `wallpaper-pick` (picker panel for `~/Pictures/Wallpapers/`).
