@@ -59,6 +59,7 @@
           ".config/dconf"
           ".config/webeep-sync"
           ".config/pulse" # PulseAudio/PipeWire auth cookie
+          ".config/gh" # GitHub CLI auth (hosts.yml)
 
           ".cache/noctalia"
           ".cache/spotify"

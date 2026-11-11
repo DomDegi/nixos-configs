@@ -84,7 +84,7 @@ GUI applications (default file-type wiring lives in default-apps.nix).
 
 *Contributes to: homeManager nixos*
 
-Development tooling: docker, git, direnv, nix-ld, micro ($EDITOR), compilers, search tools.
+Development tooling: docker, git, gh (GitHub CLI), direnv, nix-ld, micro ($EDITOR), compilers, search tools.
 
 ## `display-mode.nix`
 

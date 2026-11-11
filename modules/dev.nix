@@ -1,4 +1,4 @@
-# Development tooling: docker, git, direnv, nix-ld, micro ($EDITOR), compilers, search tools.
+# Development tooling: docker, git, gh (GitHub CLI), direnv, nix-ld, micro ($EDITOR), compilers, search tools.
 {
   flake.modules.nixos.dev = {
     virtualisation.docker.enable = true;
@@ -36,6 +36,13 @@
           defaultBranch = "main";
         };
       };
+    };
+
+    # GitHub CLI; also registers itself as git's credential helper for
+    # github.com. Auth (`gh auth login`) lives in persisted ~/.config/gh.
+    programs.gh = {
+      enable = true;
+      settings.git_protocol = "https";
     };
 
     programs.direnv = {
